@@ -72,6 +72,21 @@
     .cta-section h2 { font-size: 24px; margin-bottom: 0.75rem; }
     .cta-section p { color: rgba(255,255,255,0.6); margin-bottom: 1.5rem; }
     footer { text-align: center; padding: 1.5rem; font-size: 13px; color: rgba(255,255,255,0.35); border-top: 0.5px solid rgba(255,255,255,0.08); }
+
+    /* Dashboard */
+    #dashboard { display: none; padding: 4rem 2rem; max-width: 900px; margin: 0 auto; }
+    .user-banner { display: flex; align-items: center; gap: 14px; background: #111111; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+    .user-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #FF6B00; }
+    .user-info h4 { font-size: 15px; font-weight: 500; color: #F0F0F0; }
+    .user-info p { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .btn-logout { margin-left: auto; background: transparent; border: 0.5px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .btn-logout:hover { border-color: #FF6B00; color: #FF6B00; }
+    .dash-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+    .dash-card { background: #111111; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; }
+    .dash-card .label { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+    .dash-card .value { font-size: 28px; font-weight: 500; color: #FF6B00; }
+    .dash-card .sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
     @media (max-width: 600px) {
       nav { padding: 1rem; }
       .nav-links { display: none; }
@@ -91,188 +106,277 @@
     <a href="#tarifs">Tarifs</a>
     <a href="#connexion">Connexion</a>
   </div>
-  <button class="btn-primary">Commencer</button>
+  <button class="btn-primary" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Commencer</button>
 </nav>
 
-<div class="hero">
-  <div class="badge">Automatisation IA pour PME</div>
-  <h1>Gagnez 2 heures par jour<br>grâce à l'<span>IA</span></h1>
-  <p>SmartProcess AI automatise vos tâches répétitives — emails, saisie de données, gestion de leads — pour que vous vous concentriez sur ce qui compte vraiment.</p>
-  <div class="hero-btns">
-    <button class="btn-primary">Essayer gratuitement</button>
-    <button class="btn-outline">Voir les services</button>
+<!-- SITE PRINCIPAL -->
+<div id="main-site">
+
+  <div class="hero">
+    <div class="badge">Automatisation IA pour PME</div>
+    <h1>Gagnez 2 heures par jour<br>grâce à l'<span>IA</span></h1>
+    <p>SmartProcess AI automatise vos tâches répétitives — emails, saisie de données, gestion de leads — pour que vous vous concentriez sur ce qui compte vraiment.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Essayer gratuitement</button>
+      <button class="btn-outline" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">Voir les services</button>
+    </div>
   </div>
+
+  <hr class="divider">
+
+  <section id="services">
+    <div class="section-label">Services</div>
+    <h2>Ce qu'on automatise pour vous</h2>
+    <p class="subtitle">Des solutions concrètes adaptées aux besoins de votre entreprise.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon"><i class="ti ti-mail"></i></div>
+        <h3>Résumé des emails</h3>
+        <p>Chaque email entrant est automatiquement analysé et résumé en 3 points clés par l'IA.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="ti ti-send"></i></div>
+        <h3>Expédition automatique</h3>
+        <p>Envoi automatique d'emails selon des déclencheurs : confirmation, relance client, bienvenue prospect.</p>
+        <span class="tag">Nouveau</span>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="ti ti-message-dots"></i></div>
+        <h3>Suggestions de réponses</h3>
+        <p>L'IA analyse chaque email et vous propose une réponse rédigée, prête à envoyer en un clic.</p>
+        <span class="tag">Nouveau</span>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="ti ti-users"></i></div>
+        <h3>Gestion des leads</h3>
+        <p>Capture, qualification et relance automatique de vos prospects dans votre CRM.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="ti ti-file-text"></i></div>
+        <h3>Traitement de données</h3>
+        <p>Extraction et organisation automatique de vos factures, devis et formulaires.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="ti ti-robot"></i></div>
+        <h3>Automatisations sur mesure</h3>
+        <p>Tout processus répétitif dans votre entreprise peut être automatisé.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">Comment ça marche</div>
+    <h2>Simple, rapide, efficace</h2>
+    <p class="subtitle">De la première prise de contact à la mise en place en moins d'une semaine.</p>
+    <div class="process">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Démo gratuite d'une semaine</h3>
+          <p>On analyse ensemble vos processus et identifie les tâches à automatiser en priorité.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Proposition personnalisée</h3>
+          <p>Je vous prépare une solution sur mesure avec un devis clair et transparent.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Mise en place en 48h</h3>
+          <p>Déploiement rapide et formation de vos équipes incluse.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Suivi et maintenance</h3>
+          <p>Je reste disponible pour ajuster et optimiser vos automatisations dans le temps.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="tarifs">
+    <div class="section-label">Tarifs</div>
+    <h2>Des offres claires et transparentes</h2>
+    <p class="subtitle">Pas de mauvaises surprises. Résiliez à tout moment.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="plan-name">Starter</div>
+        <div class="price">29€ <span>/ mois</span></div>
+        <div class="plan-desc">Idéal pour tester l'automatisation sur une tâche précise.</div>
+        <ul class="features">
+          <li><i class="ti ti-check"></i> 100 emails traités/mois</li>
+          <li><i class="ti ti-check"></i> Résumé automatique</li>
+          <li><i class="ti ti-check"></i> Google Sheets inclus</li>
+          <li><i class="ti ti-check"></i> Support par email</li>
+        </ul>
+        <button class="btn-outline" style="width:100%" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Commencer</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="popular-badge">Le plus populaire</div>
+        <div class="plan-name">Pro</div>
+        <div class="price">49€ <span>/ mois</span></div>
+        <div class="plan-desc">Pour automatiser plusieurs processus et gagner un maximum de temps.</div>
+        <ul class="features">
+          <li><i class="ti ti-check"></i> 500 emails traités/mois</li>
+          <li><i class="ti ti-check"></i> Résumé + suggestions de réponses</li>
+          <li><i class="ti ti-check"></i> Expédition automatique</li>
+          <li><i class="ti ti-check"></i> Tableau de bord avancé</li>
+          <li><i class="ti ti-check"></i> Support prioritaire</li>
+        </ul>
+        <button class="btn-primary" style="width:100%" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Choisir Pro</button>
+      </div>
+      <div class="pricing-card">
+        <div class="plan-name">Business</div>
+        <div class="price">99€ <span>/ mois</span></div>
+        <div class="plan-desc">Pour les entreprises avec un volume élevé d'emails et de processus.</div>
+        <ul class="features">
+          <li><i class="ti ti-check"></i> Emails illimités</li>
+          <li><i class="ti ti-check"></i> Toutes les fonctionnalités Pro</li>
+          <li><i class="ti ti-check"></i> Automatisations sur mesure</li>
+          <li><i class="ti ti-check"></i> Onboarding dédié</li>
+          <li><i class="ti ti-check"></i> Support 7j/7</li>
+        </ul>
+        <button class="btn-outline" style="width:100%">Contacter</button>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="connexion">
+    <div class="section-label">Connexion</div>
+    <h2 style="text-align:center">Accédez à votre espace</h2>
+    <p class="subtitle" style="text-align:center">Connectez-vous pour accéder à votre tableau de bord SmartProcess AI.</p>
+    <div class="login-card">
+      <h3>Se connecter</h3>
+      <p class="sub">Accédez à vos automatisations et résumés d'emails en un clic.</p>
+      <div class="perks">
+        <div class="perk"><i class="ti ti-shield-check"></i> Connexion sécurisée via Google</div>
+        <div class="perk"><i class="ti ti-bolt"></i> Accès instantané à vos automatisations</div>
+        <div class="perk"><i class="ti ti-chart-bar"></i> Tableau de bord en temps réel</div>
+      </div>
+      <button class="btn-google" onclick="loginWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continuer avec Google
+      </button>
+      <div class="login-divider"><hr><span>ou</span><hr></div>
+      <input type="email" placeholder="Votre adresse email">
+      <input type="password" placeholder="Mot de passe">
+      <button class="btn-primary" style="width:100%; margin-bottom:12px;">Se connecter</button>
+      <p style="text-align:center; font-size:13px; color:rgba(255,255,255,0.4);">Pas encore de compte ? <span style="color:#FF6B00; cursor:pointer;">Créer un compte</span></p>
+    </div>
+  </section>
+
+  <div class="cta-section">
+    <h2>Prêt à gagner du temps ?</h2>
+    <p>Essayez SmartProcess AI gratuitement pendant 7 jours — sans carte bancaire.</p>
+    <button class="btn-primary" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Démarrer l'essai gratuit</button>
+  </div>
+
+  <footer>
+    © 2026 SmartProcess AI — Nello Boussely · contact@smartprocessai.com
+  </footer>
+
 </div>
 
-<hr class="divider">
-
-<section id="services">
-  <div class="section-label">Services</div>
-  <h2>Ce qu'on automatise pour vous</h2>
-  <p class="subtitle">Des solutions concrètes adaptées aux besoins de votre entreprise.</p>
-  <div class="cards">
-    <div class="card">
-      <div class="card-icon"><i class="ti ti-mail"></i></div>
-      <h3>Résumé des emails</h3>
-      <p>Chaque email entrant est automatiquement analysé et résumé en 3 points clés par l'IA.</p>
+<!-- DASHBOARD (affiché après connexion) -->
+<div id="dashboard">
+  <div class="user-banner">
+    <img class="user-avatar" id="user-avatar" src="" alt="Avatar">
+    <div class="user-info">
+      <h4 id="user-name">Chargement...</h4>
+      <p id="user-email"></p>
     </div>
-    <div class="card">
-      <div class="card-icon"><i class="ti ti-send"></i></div>
-      <h3>Expédition automatique</h3>
-      <p>Envoi automatique d'emails selon des déclencheurs : confirmation, relance client, bienvenue prospect.</p>
-      <span class="tag">Nouveau</span>
+    <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+  </div>
+  <div class="section-label">Tableau de bord</div>
+  <h2 style="margin-bottom:1.5rem">Vos automatisations</h2>
+  <div class="dash-cards">
+    <div class="dash-card">
+      <div class="label">Emails traités</div>
+      <div class="value">0</div>
+      <div class="sub">ce mois-ci</div>
     </div>
-    <div class="card">
-      <div class="card-icon"><i class="ti ti-message-dots"></i></div>
-      <h3>Suggestions de réponses</h3>
-      <p>L'IA analyse chaque email et vous propose une réponse rédigée, prête à envoyer en un clic.</p>
-      <span class="tag">Nouveau</span>
+    <div class="dash-card">
+      <div class="label">Résumés générés</div>
+      <div class="value">0</div>
+      <div class="sub">ce mois-ci</div>
     </div>
-    <div class="card">
-      <div class="card-icon"><i class="ti ti-users"></i></div>
-      <h3>Gestion des leads</h3>
-      <p>Capture, qualification et relance automatique de vos prospects dans votre CRM.</p>
+    <div class="dash-card">
+      <div class="label">Réponses suggérées</div>
+      <div class="value">0</div>
+      <div class="sub">ce mois-ci</div>
     </div>
-    <div class="card">
-      <div class="card-icon"><i class="ti ti-file-text"></i></div>
-      <h3>Traitement de données</h3>
-      <p>Extraction et organisation automatique de vos factures, devis et formulaires.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon"><i class="ti ti-robot"></i></div>
-      <h3>Automatisations sur mesure</h3>
-      <p>Tout processus répétitif dans votre entreprise peut être automatisé.</p>
+    <div class="dash-card">
+      <div class="label">Temps économisé</div>
+      <div class="value">0h</div>
+      <div class="sub">estimé</div>
     </div>
   </div>
-</section>
-
-<hr class="divider">
-
-<section>
-  <div class="section-label">Comment ça marche</div>
-  <h2>Simple, rapide, efficace</h2>
-  <p class="subtitle">De la première prise de contact à la mise en place en moins d'une semaine.</p>
-  <div class="process">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <h3>Démo gratuite d'une semaine</h3>
-        <p>On analyse ensemble vos processus et identifie les tâches à automatiser en priorité.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <h3>Proposition personnalisée</h3>
-        <p>Je vous prépare une solution sur mesure avec un devis clair et transparent.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <h3>Mise en place en 48h</h3>
-        <p>Déploiement rapide et formation de vos équipes incluse.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <h3>Suivi et maintenance</h3>
-        <p>Je reste disponible pour ajuster et optimiser vos automatisations dans le temps.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section id="tarifs">
-  <div class="section-label">Tarifs</div>
-  <h2>Des offres claires et transparentes</h2>
-  <p class="subtitle">Pas de mauvaises surprises. Résiliez à tout moment.</p>
-  <div class="pricing-grid">
-    <div class="pricing-card">
-      <div class="plan-name">Starter</div>
-      <div class="price">29€ <span>/ mois</span></div>
-      <div class="plan-desc">Idéal pour tester l'automatisation sur une tâche précise.</div>
-      <ul class="features">
-        <li><i class="ti ti-check"></i> 100 emails traités/mois</li>
-        <li><i class="ti ti-check"></i> Résumé automatique</li>
-        <li><i class="ti ti-check"></i> Google Sheets inclus</li>
-        <li><i class="ti ti-check"></i> Support par email</li>
-      </ul>
-      <button class="btn-outline" style="width:100%">Commencer</button>
-    </div>
-    <div class="pricing-card featured">
-      <div class="popular-badge">Le plus populaire</div>
-      <div class="plan-name">Pro</div>
-      <div class="price">49€ <span>/ mois</span></div>
-      <div class="plan-desc">Pour automatiser plusieurs processus et gagner un maximum de temps.</div>
-      <ul class="features">
-        <li><i class="ti ti-check"></i> 500 emails traités/mois</li>
-        <li><i class="ti ti-check"></i> Résumé + suggestions de réponses</li>
-        <li><i class="ti ti-check"></i> Expédition automatique</li>
-        <li><i class="ti ti-check"></i> Tableau de bord avancé</li>
-        <li><i class="ti ti-check"></i> Support prioritaire</li>
-      </ul>
-      <button class="btn-primary" style="width:100%">Choisir Pro</button>
-    </div>
-    <div class="pricing-card">
-      <div class="plan-name">Business</div>
-      <div class="price">99€ <span>/ mois</span></div>
-      <div class="plan-desc">Pour les entreprises avec un volume élevé d'emails et de processus.</div>
-      <ul class="features">
-        <li><i class="ti ti-check"></i> Emails illimités</li>
-        <li><i class="ti ti-check"></i> Toutes les fonctionnalités Pro</li>
-        <li><i class="ti ti-check"></i> Automatisations sur mesure</li>
-        <li><i class="ti ti-check"></i> Onboarding dédié</li>
-        <li><i class="ti ti-check"></i> Support 7j/7</li>
-      </ul>
-      <button class="btn-outline" style="width:100%">Contacter</button>
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section id="connexion">
-  <div class="section-label">Connexion</div>
-  <h2 style="text-align:center">Accédez à votre espace</h2>
-  <p class="subtitle" style="text-align:center">Connectez-vous pour accéder à votre tableau de bord SmartProcess AI.</p>
-  <div class="login-card">
-    <h3>Se connecter</h3>
-    <p class="sub">Accédez à vos automatisations et résumés d'emails en un clic.</p>
-    <div class="perks">
-      <div class="perk"><i class="ti ti-shield-check"></i> Connexion sécurisée via Google</div>
-      <div class="perk"><i class="ti ti-bolt"></i> Accès instantané à vos automatisations</div>
-      <div class="perk"><i class="ti ti-chart-bar"></i> Tableau de bord en temps réel</div>
-    </div>
-    <button class="btn-google">
-      <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      Continuer avec Google
-    </button>
-    <div class="login-divider"><hr><span>ou</span><hr></div>
-    <input type="email" placeholder="Votre adresse email">
-    <input type="password" placeholder="Mot de passe">
-    <button class="btn-primary" style="width:100%; margin-bottom:12px;">Se connecter</button>
-    <p style="text-align:center; font-size:13px; color:rgba(255,255,255,0.4);">Pas encore de compte ? <span style="color:#FF6B00; cursor:pointer;">Créer un compte</span></p>
-  </div>
-</section>
-
-<div class="cta-section">
-  <h2>Prêt à gagner du temps ?</h2>
-  <p>Essayez SmartProcess AI gratuitement pendant 7 jours — sans carte bancaire.</p>
-  <button class="btn-primary">Démarrer l'essai gratuit</button>
+  <p style="font-size:14px; color:rgba(255,255,255,0.4); text-align:center; margin-top:2rem;">Votre tableau de bord complet arrive bientôt. 🚀</p>
 </div>
 
-<footer>
-  © 2026 SmartProcess AI — Nello Boussely · contact@smartprocessai.com
-</footer>
+<script>
+  const CLIENT_ID = '204789491425-n0gho0te1j0bvkh6nqj8gajkgikv7589.apps.googleusercontent.com';
+  const REDIRECT_URI = 'https://smartprocessai.vercel.app/callback';
+
+  function loginWithGoogle() {
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=email%20profile&prompt=select_account`;
+    window.location.href = url;
+  }
+
+  function showDashboard(user) {
+    document.getElementById('main-site').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-email').textContent = user.email;
+    document.getElementById('user-avatar').src = user.picture;
+  }
+
+  function logout() {
+    localStorage.removeItem('google_user');
+    document.getElementById('main-site').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+  }
+
+  // Vérifier si déjà connecté
+  const savedUser = localStorage.getItem('google_user');
+  if (savedUser) {
+    showDashboard(JSON.parse(savedUser));
+  }
+
+  // Récupérer le token depuis l'URL après redirection Google
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get('access_token');
+    fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(r => r.json())
+    .then(user => {
+      const userData = { name: user.name, email: user.email, picture: user.picture };
+      localStorage.setItem('google_user', JSON.stringify(userData));
+      window.location.hash = '';
+      showDashboard(userData);
+    });
+  }
+</script>
 
 </body>
 </html>
