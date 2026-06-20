@@ -547,8 +547,8 @@
       supabaseClient.from('gmail_connections').select('user_id').eq('user_id', user.id).maybeSingle()
         .then(({ data: row }) => {
           if (row) {
-            statusEl.textContent = "Gmail connecté ✓";
-            btnEl.textContent = "Reconnecter ma boîte Gmail";
+            statusEl.textContent = "Succès, adresse mail connectée ✓";
+            btnEl.textContent = "Changer d'adresse mail";
           }
         });
     });
