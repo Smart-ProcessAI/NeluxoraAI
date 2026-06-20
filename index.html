@@ -371,12 +371,18 @@
       <div class="sub">estimé</div>
     </div>
   </div>
+  <div class="dash-card" id="gmail-connect-card" style="margin-bottom:2rem;">
+    <div class="label">Boîte mail Gmail</div>
+    <p id="gmail-status" style="font-size:13px; color:#6b7280; margin:6px 0 12px;">Non connectée</p>
+    <button class="btn-primary" id="gmail-connect-btn" style="width:100%;" onclick="connectGmail()">Connecter ma boîte mail Gmail</button>
+  </div>
+ 
   <p style="font-size:14px; color:#9ca3af; text-align:center; margin-top:2rem;">Votre tableau de bord complet arrive bientôt. 🚀</p>
 </div>
-
 <script>
   const CLIENT_ID = '204789491425-n0gho0te1j0bvkh6nqj8gajkgikv7589.apps.googleusercontent.com';
   const REDIRECT_URI = 'https://www.neluxoraai.com';
+  const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send';
 
   // --- Supabase ---
   const SUPABASE_URL = 'https://mpekpdazuecprgfpweex.supabase.co';
@@ -515,7 +521,37 @@
       document.getElementById('user-name').textContent = user.name;
       document.getElementById('user-email').textContent = user.email;
       document.getElementById('user-avatar').src = user.picture;
-    }
+   checkGmailStatus(); }
+  }
+  function connectGmail() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) {
+        alert("Pour connecter ta boîte Gmail, connecte-toi d'abord avec le code reçu par email (et non avec Google).");
+        return;
+      }
+      const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&access_type=offline&prompt=consent&scope=${encodeURIComponent(GMAIL_SCOPES)}&state=gmail_connect`;
+      window.location.href = url;
+    });
+  }
+
+  function checkGmailStatus() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      const statusEl = document.getElementById('gmail-status');
+      const btnEl = document.getElementById('gmail-connect-btn');
+      if (!user) {
+        statusEl.textContent = "Connecte-toi avec le code email pour lier Gmail.";
+        return;
+      }
+      supabaseClient.from('gmail_connections').select('user_id').eq('user_id', user.id).maybeSingle()
+        .then(({ data: row }) => {
+          if (row) {
+            statusEl.textContent = "Gmail connecté ✓";
+            btnEl.textContent = "Reconnecter ma boîte Gmail";
+          }
+        });
+    });
   }
 
   function goHome() {
