@@ -591,6 +591,28 @@
       window.location.href = window.location.pathname;
     });
   }
+  // Retour après connexion Gmail (authorization code flow)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('state') === 'gmail_connect' && urlParams.get('code')) {
+    const code = urlParams.get('code');
+    supabaseClient.auth.getSession().then(({ data }) => {
+      const session = data?.session;
+      if (!session) return;
+      fetch(`${SUPABASE_URL}/functions/v1/gmail-oauth-callback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ code, redirect_uri: REDIRECT_URI, user_id: session.user.id })
+      })
+      .then(() => {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        goToDashboard();
+      })
+      .catch(() => window.history.replaceState({}, document.title, window.location.pathname));
+    });
+  }
 </script>
 
 </body>
