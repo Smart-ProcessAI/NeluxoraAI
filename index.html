@@ -576,28 +576,16 @@
     showFloatingAvatar(user.picture);
   }
 
-  // Retour après connexion Google : rester sur le site, montrer l'avatar
-  const hash = window.location.hash;
-  if (hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.substring(1));
-    const token = params.get('access_token');
-    fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(r => r.json())
-    .then(user => {
-      const userData = { name: user.name, email: user.email, picture: user.picture };
-      localStorage.setItem('google_user', JSON.stringify(userData));
-      window.location.href = window.location.pathname;
-    });
-  }
-  // Retour après connexion Gmail (authorization code flow)
+// Retour après connexion Gmail (authorization code flow)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('state') === 'gmail_connect' && urlParams.get('code')) {
     const code = urlParams.get('code');
     supabaseClient.auth.getSession().then(({ data }) => {
       const session = data?.session;
-      if (!session) return;
+      if (!session) {
+        console.error('Pas de session Supabase au retour de Google');
+        return;
+      }
       fetch(`${SUPABASE_URL}/functions/v1/gmail-oauth-callback`, {
         method: 'POST',
         headers: {
@@ -606,11 +594,21 @@
         },
         body: JSON.stringify({ code, redirect_uri: REDIRECT_URI, user_id: session.user.id })
       })
-      .then(() => {
+      .then(async (r) => {
+        const body = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          console.error('Erreur gmail-oauth-callback:', r.status, body);
+          alert('Erreur connexion Gmail : ' + (body.error || r.status));
+          return;
+        }
+        console.log('Gmail connecté avec succès', body);
         window.history.replaceState({}, document.title, window.location.pathname);
         goToDashboard();
       })
-      .catch(() => window.history.replaceState({}, document.title, window.location.pathname));
+      .catch((err) => {
+        console.error('Erreur réseau (probablement CORS) :', err);
+        alert('Erreur réseau lors de la connexion Gmail. Vérifie la console.');
+      });
     });
   }
 </script>
