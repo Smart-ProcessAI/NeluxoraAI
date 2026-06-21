@@ -376,8 +376,13 @@
     <p id="gmail-status" style="font-size:13px; color:#6b7280; margin:6px 0 12px;">Non connectée</p>
     <button class="btn-primary" id="gmail-connect-btn" style="width:100%;" onclick="connectGmail()">Connecter ma boîte mail Gmail</button>
   </div>
- 
-  <p style="font-size:14px; color:#9ca3af; text-align:center; margin-top:2rem;">Votre tableau de bord complet arrive bientôt. 🚀</p>
+
+  <div class="section-label" style="margin-top:2rem">Activité récente</div>
+  <h2 style="margin-bottom:1rem">Vos automatisations</h2>
+  <div id="automations-list">
+    <p style="color:#9ca3af; font-size:14px;">Chargement...</p>
+  </div>
+
 </div>
 <script>
   const CLIENT_ID = '204789491425-n0gho0te1j0bvkh6nqj8gajkgikv7589.apps.googleusercontent.com';
@@ -521,7 +526,9 @@
       document.getElementById('user-name').textContent = user.name;
       document.getElementById('user-email').textContent = user.email;
       document.getElementById('user-avatar').src = user.picture;
-   checkGmailStatus(); }
+      checkGmailStatus();
+      loadEmailAutomations();
+    }
   }
   function connectGmail() {
     supabaseClient.auth.getUser().then(({ data }) => {
@@ -550,6 +557,55 @@
             statusEl.textContent = "Succès, adresse mail connectée ✓" + (row.email ? " (" + row.email + ")" : "");
             btnEl.textContent = "Changer d'adresse mail";
           }
+        });
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function loadEmailAutomations() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      supabaseClient
+        .from('email_automations')
+        .select('subject, sender, summary, suggested_reply, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then(({ data: rows, error }) => {
+          const listEl = document.getElementById('automations-list');
+          const values = document.querySelectorAll('.dash-card .value');
+
+          if (error || !rows) {
+            listEl.innerHTML = '<p style="color:#9ca3af; font-size:14px;">Erreur de chargement.</p>';
+            return;
+          }
+
+          if (values[0]) values[0].textContent = rows.length;
+          if (values[1]) values[1].textContent = rows.length;
+          if (values[2]) values[2].textContent = rows.filter(r => r.suggested_reply).length;
+          if (values[3]) values[3].textContent = Math.round(rows.length * 2 / 60 * 10) / 10 + 'h';
+
+          if (rows.length === 0) {
+            listEl.innerHTML = '<p style="color:#9ca3af; font-size:14px;">Aucun email traité pour le moment.</p>';
+            return;
+          }
+
+          listEl.innerHTML = rows.map(r => `
+            <div class="dash-card" style="margin-bottom:12px; text-align:left;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:12px;">
+                <strong style="font-size:14px; color:#1a1a2e;">${escapeHtml(r.subject) || '(sans sujet)'}</strong>
+                <span style="font-size:11px; color:#9ca3af; white-space:nowrap;">${new Date(r.created_at).toLocaleString('fr-FR')}</span>
+              </div>
+              <p style="font-size:12px; color:#9ca3af; margin-bottom:8px;">De : ${escapeHtml(r.sender)}</p>
+              <p style="font-size:13px; color:#1a1a2e; margin-bottom:8px;"><strong>Résumé :</strong> ${escapeHtml(r.summary).replace(/\n/g, '<br>')}</p>
+              <p style="font-size:13px; color:#6b7280;"><strong>Réponse suggérée :</strong> ${escapeHtml(r.suggested_reply).replace(/\n/g, '<br>')}</p>
+            </div>
+          `).join('');
         });
     });
   }
