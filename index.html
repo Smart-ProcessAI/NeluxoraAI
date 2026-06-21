@@ -100,6 +100,12 @@
     .dash-card .label { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
     .dash-card .value { font-size: 28px; font-weight: 500; color: #534AB7; }
     .dash-card .sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .automations-table { width: 100%; border-collapse: collapse; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; font-size: 13px; }
+    .automations-table th { background: #f8f9ff; color: #534AB7; text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
+    .automations-table td { padding: 12px; border-bottom: 0.5px solid rgba(0,0,0,0.06); vertical-align: top; color: #1a1a2e; }
+    .automations-table tr:last-child td { border-bottom: none; }
+    .automations-table .col-date { white-space: nowrap; color: #9ca3af; font-size: 12px; }
+    .automations-table .col-sender { color: #6b7280; font-size: 12px; }
 
     @media (max-width: 600px) {
       nav { padding: 1rem; }
@@ -567,6 +573,11 @@
     return div.innerHTML;
   }
 
+  function truncate(str, max) {
+    str = str || '';
+    return str.length > max ? str.slice(0, max).trim() + '…' : str;
+  }
+
   function loadEmailAutomations() {
     supabaseClient.auth.getUser().then(({ data }) => {
       const user = data?.user;
@@ -595,17 +606,34 @@
             return;
           }
 
-          listEl.innerHTML = rows.map(r => `
-            <div class="dash-card" style="margin-bottom:12px; text-align:left;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:12px;">
-                <strong style="font-size:14px; color:#1a1a2e;">${escapeHtml(r.subject) || '(sans sujet)'}</strong>
-                <span style="font-size:11px; color:#9ca3af; white-space:nowrap;">${new Date(r.created_at).toLocaleString('fr-FR')}</span>
-              </div>
-              <p style="font-size:12px; color:#9ca3af; margin-bottom:8px;">De : ${escapeHtml(r.sender)}</p>
-              <p style="font-size:13px; color:#1a1a2e; margin-bottom:8px;"><strong>Résumé :</strong> ${escapeHtml(r.summary).replace(/\n/g, '<br>')}</p>
-              <p style="font-size:13px; color:#6b7280;"><strong>Réponse suggérée :</strong> ${escapeHtml(r.suggested_reply).replace(/\n/g, '<br>')}</p>
-            </div>
+          const rowsHtml = rows.map(r => `
+            <tr>
+              <td class="col-date">${new Date(r.created_at).toLocaleString('fr-FR')}</td>
+              <td><strong>${escapeHtml(r.subject) || '(sans sujet)'}</strong></td>
+              <td class="col-sender">${escapeHtml(r.sender)}</td>
+              <td>${escapeHtml(truncate(r.summary, 150))}</td>
+              <td>${escapeHtml(truncate(r.suggested_reply, 150))}</td>
+            </tr>
           `).join('');
+
+          listEl.innerHTML = `
+            <div style="overflow-x:auto;">
+              <table class="automations-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Sujet</th>
+                    <th>Expéditeur</th>
+                    <th>Résumé</th>
+                    <th>Réponse suggérée</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml}
+                </tbody>
+              </table>
+            </div>
+          `;
         });
     });
   }
