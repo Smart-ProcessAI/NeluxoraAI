@@ -559,7 +559,7 @@
       const statusEl = document.getElementById('gmail-status');
       const btnEl = document.getElementById('gmail-connect-btn');
       if (!user) {
-        statusEl.textContent = "Connecte-toi avec le code email pour lier Gmail.";
+        statusEl.textContent = "Connecte ta boîte Gmail pour activer les automatisations.";
         return;
       }
       supabaseClient.from('gmail_connections').select('user_id, email').eq('user_id', user.id).maybeSingle()
