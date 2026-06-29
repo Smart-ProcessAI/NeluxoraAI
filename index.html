@@ -499,8 +499,13 @@
   // --- Fin Supabase ---
 
   function loginWithGoogle() {
-    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=email%20profile&prompt=select_account`;
-    window.location.href = url;
+    supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: REDIRECT_URI,
+        scopes: 'email profile'
+      }
+    });
   }
 
  function showFloatingAvatar(picture) {
