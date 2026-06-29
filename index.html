@@ -699,6 +699,19 @@
       });
     });
   }
+  // Retour après connexion Google via Supabase OAuth
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      const user = session.user;
+      const userData = {
+        name: user.user_metadata?.full_name || user.email,
+        email: user.email,
+        picture: user.user_metadata?.avatar_url || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.email)
+      };
+      localStorage.setItem('google_user', JSON.stringify(userData));
+      showFloatingAvatar(userData.picture);
+    }
+  });
 </script>
 
 </body>
