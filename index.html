@@ -581,6 +581,7 @@
     document.getElementById('avatar-menu').style.display = 'none';
     document.getElementById('main-site').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
+    localStorage.setItem('nx_view', 'dashboard');
 
     const savedUser = JSON.parse(localStorage.getItem('google_user') || 'null');
     if (savedUser) {
@@ -616,6 +617,7 @@
         alert("Pour connecter ta boîte Gmail, connecte-toi d'abord avec le code reçu par email (et non avec Google).");
         return;
       }
+      localStorage.setItem('nx_view', 'dashboard');
       const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&access_type=offline&prompt=consent&scope=${encodeURIComponent(GMAIL_SCOPES)}&state=gmail_connect`;
       window.location.href = url;
     });
@@ -814,6 +816,7 @@
   function goHome() {
     document.getElementById('main-site').style.display = 'block';
     document.getElementById('dashboard').style.display = 'none';
+    localStorage.setItem('nx_view', 'site');
   }
 
   function logout() {
@@ -831,6 +834,11 @@
   if (savedUser) {
     const user = JSON.parse(savedUser);
     showFloatingAvatar(user.picture);
+  }
+
+  // Restaurer la vue mémorisée (site ou dashboard) au chargement, par exemple après un F5
+  if (localStorage.getItem('nx_view') === 'dashboard' && savedUser) {
+    goToDashboard();
   }
 
   // Retour après connexion Google via Supabase OAuth
