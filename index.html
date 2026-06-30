@@ -119,6 +119,17 @@
     .mail-list-item:hover { background: #f8f9ff; }
     .mail-list-item.active { background: #EEEDFE; border-left: 3px solid #534AB7; padding-left: 15px; }
     .mail-list-item .mli-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+    .mli-checkbox-wrap { display: flex; align-items: center; opacity: 0; width: 0; overflow: hidden; transition: opacity 0.15s, width 0.15s; flex-shrink: 0; }
+    .mail-list-item:hover .mli-checkbox-wrap, .mail-list-item.checked .mli-checkbox-wrap, .mail-bulk-bar .mli-checkbox-wrap { opacity: 1; width: 18px; }
+    .mli-checkbox-wrap input { width: 15px; height: 15px; cursor: pointer; accent-color: #534AB7; }
+    .mli-row { display: flex; align-items: flex-start; gap: 8px; }
+    .mli-row-content { flex: 1; min-width: 0; }
+    .mail-bulk-bar { display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: #EEEDFE; border-bottom: 0.5px solid rgba(0,0,0,0.08); font-size: 12px; color: #534AB7; }
+    .mail-bulk-bar #mail-bulk-count { font-weight: 500; }
+    .mail-bulk-action { margin-left: auto; background: #534AB7; color: #fff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500; }
+    .mail-bulk-action:hover { background: #3C3489; }
+    .mail-bulk-cancel { background: transparent; border: none; color: #6b7280; font-size: 12px; cursor: pointer; padding: 5px 8px; }
+    .mail-bulk-cancel:hover { color: #1a1a2e; }
     .mail-list-item .mli-sender { font-size: 12px; color: #6b7280; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
     .mail-list-item .mli-date { font-size: 11px; color: #9ca3af; white-space: nowrap; }
     .mail-list-item .mli-subject { font-size: 13px; color: #1a1a2e; font-weight: 500; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -443,6 +454,14 @@
         <i class="ti ti-search"></i>
         <input type="text" id="mail-search" placeholder="Rechercher un email, un expéditeur..." oninput="filterAutomations()">
       </div>
+      <div class="mail-bulk-bar" id="mail-bulk-bar" style="display:none;">
+        <label class="mli-checkbox-wrap">
+          <input type="checkbox" id="mail-select-all" onchange="toggleSelectAll(this.checked)">
+        </label>
+        <span id="mail-bulk-count">0 sélectionné(s)</span>
+        <button class="mail-bulk-action" id="mail-bulk-action-btn" onclick="bulkAction()"></button>
+        <button class="mail-bulk-cancel" onclick="clearSelection()">Annuler</button>
+      </div>
       <div class="mail-count" id="mail-count"></div>
       <div class="mail-list" id="mail-list">
         <div class="mail-empty">Chargement...</div>
@@ -720,6 +739,7 @@
   }
 
   let currentMailTab = 'inbox';
+  let selectedIds = new Set();
 
   function switchMailTab(tab) {
     currentMailTab = tab;
@@ -727,6 +747,7 @@
     document.getElementById('tab-trash').classList.toggle('active', tab === 'trash');
     document.getElementById('mail-search').value = '';
     selectedAutomationIndex = null;
+    clearSelection();
     loadEmailAutomations();
   }
 
@@ -784,6 +805,66 @@
     return Math.max(daysLeft, 0);
   }
 
+  function updateBulkBar() {
+    const bar = document.getElementById('mail-bulk-bar');
+    const countEl = document.getElementById('mail-bulk-count');
+    const actionBtn = document.getElementById('mail-bulk-action-btn');
+    const selectAllCheckbox = document.getElementById('mail-select-all');
+
+    if (selectedIds.size === 0) {
+      bar.style.display = 'none';
+      return;
+    }
+
+    bar.style.display = 'flex';
+    countEl.textContent = selectedIds.size + ' sélectionné(s)';
+    actionBtn.textContent = currentMailTab === 'trash' ? 'Restaurer' : 'Mettre à la corbeille';
+
+    const currentRows = getFilteredAutomations();
+    selectAllCheckbox.checked = currentRows.length > 0 && currentRows.every(r => selectedIds.has(r.id));
+  }
+
+  function toggleSelect(id, event) {
+    event.stopPropagation();
+    if (selectedIds.has(id)) selectedIds.delete(id);
+    else selectedIds.add(id);
+    renderMailList(getFilteredAutomations());
+    updateBulkBar();
+  }
+
+  function toggleSelectAll(checked) {
+    const currentRows = getFilteredAutomations();
+    if (checked) currentRows.forEach(r => selectedIds.add(r.id));
+    else currentRows.forEach(r => selectedIds.delete(r.id));
+    renderMailList(currentRows);
+    updateBulkBar();
+  }
+
+  function clearSelection() {
+    selectedIds.clear();
+    const bar = document.getElementById('mail-bulk-bar');
+    if (bar) bar.style.display = 'none';
+    renderMailList(getFilteredAutomations());
+  }
+
+  function bulkAction() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    const action = currentMailTab === 'trash'
+      ? supabaseClient.from('email_automations').update({ deleted_at: null }).in('id', ids)
+      : supabaseClient.from('email_automations').update({ deleted_at: new Date().toISOString() }).in('id', ids);
+
+    action.then(({ error }) => {
+      if (error) {
+        alert('Erreur lors de l\'action groupée : ' + error.message);
+        return;
+      }
+      selectedIds.clear();
+      loadEmailAutomations();
+    });
+  }
+
   function renderMailList(rows) {
     const listEl = document.getElementById('mail-list');
     const countEl = document.getElementById('mail-count');
@@ -795,197 +876,12 @@
     }
 
     listEl.innerHTML = rows.map((r, i) => `
-      <div class="mail-list-item${selectedAutomationIndex === i ? ' active' : ''}" onclick="selectAutomation(${i})">
-        <div class="mli-top">
-          <span class="mli-sender">${escapeHtml(r.sender)}</span>
-          <span class="mli-date">${new Date(r.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</span>
-        </div>
-        <div class="mli-subject">${escapeHtml(r.subject) || '(sans sujet)'}</div>
-        <div class="mli-snippet">${escapeHtml(truncate(r.summary, 70))}</div>
-        <div class="mli-bottom">
-          ${currentMailTab === 'trash'
-            ? `<span class="mli-days-left">Suppression définitive dans ${daysLeftBeforePurge(r.deleted_at)} j</span>
-               <button class="mli-restore-btn" onclick="event.stopPropagation(); restoreAutomation('${r.id}')">Restaurer</button>`
-            : `<span></span><button class="mli-trash-btn" title="Mettre à la corbeille" onclick="event.stopPropagation(); trashAutomation('${r.id}')"><i class="ti ti-trash"></i></button>`
-          }
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function selectAutomation(index) {
-    selectedAutomationIndex = index;
-    const currentRows = getFilteredAutomations();
-    renderMailList(currentRows);
-    renderMailDetail(currentRows[index]);
-  }
-
-  function trashAutomation(id) {
-    supabaseClient
-      .from('email_automations')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id)
-      .then(({ error }) => {
-        if (error) {
-          alert('Erreur lors de la mise à la corbeille : ' + error.message);
-          return;
-        }
-        loadEmailAutomations();
-      });
-  }
-
-  function restoreAutomation(id) {
-    supabaseClient
-      .from('email_automations')
-      .update({ deleted_at: null })
-      .eq('id', id)
-      .then(({ error }) => {
-        if (error) {
-          alert('Erreur lors de la restauration : ' + error.message);
-          return;
-        }
-        loadEmailAutomations();
-      });
-  }
-
-  function renderMailDetail(row) {
-    const detailEl = document.getElementById('mail-detail');
-    if (!row) {
-      detailEl.innerHTML = '<div class="mail-detail-empty">Sélectionnez un email dans la liste pour voir le résumé et la réponse suggérée.</div>';
-      return;
-    }
-
-    detailEl.innerHTML = `
-      <div class="mail-detail-subject">${escapeHtml(row.subject) || '(sans sujet)'}</div>
-      <div class="mail-detail-meta">
-        <span><strong>De :</strong> ${escapeHtml(row.sender)}</span>
-        <span><strong>Reçu le :</strong> ${new Date(row.created_at).toLocaleString('fr-FR')}</span>
-        ${currentMailTab === 'trash' ? `<span><strong>Suppression définitive dans :</strong> ${daysLeftBeforePurge(row.deleted_at)} jour(s)</span>` : ''}
-      </div>
-      <div class="mail-block">
-        <div class="mail-block-label">
-          Résumé
-          <button class="copy-btn" onclick="copyToClipboard(this, ${JSON.stringify(row.summary || '')})">Copier</button>
-        </div>
-        <div class="mail-block-content">${escapeHtml(row.summary) || 'Aucun résumé disponible.'}</div>
-      </div>
-      <div class="mail-block">
-        <div class="mail-block-label">
-          Réponse suggérée
-          <button class="copy-btn" onclick="copyToClipboard(this, ${JSON.stringify(row.suggested_reply || '')})">Copier</button>
-        </div>
-        <div class="mail-block-content">${escapeHtml(row.suggested_reply) || 'Aucune réponse suggérée.'}</div>
-      </div>
-      ${currentMailTab === 'trash'
-        ? `<button class="btn-outline" onclick="restoreAutomation('${row.id}')"><i class="ti ti-arrow-back-up"></i> Restaurer cet email</button>`
-        : `<button class="btn-outline" style="color:#e53e3e; border-color:#e53e3e;" onclick="trashAutomation('${row.id}')"><i class="ti ti-trash"></i> Mettre à la corbeille</button>`
-      }
-    `;
-  }
-
-  function copyToClipboard(btn, text) {
-    navigator.clipboard.writeText(text).then(() => {
-      const original = btn.textContent;
-      btn.textContent = 'Copié ✓';
-      setTimeout(() => { btn.textContent = original; }, 1500);
-    });
-  }
-
-  function getFilteredAutomations() {
-    const query = (document.getElementById('mail-search').value || '').trim().toLowerCase();
-    if (!query) return allAutomations;
-    return allAutomations.filter(r =>
-      (r.subject || '').toLowerCase().includes(query) ||
-      (r.sender || '').toLowerCase().includes(query) ||
-      (r.summary || '').toLowerCase().includes(query) ||
-      (r.suggested_reply || '').toLowerCase().includes(query)
-    );
-  }
-
-  function filterAutomations() {
-    selectedAutomationIndex = null;
-    const filtered = getFilteredAutomations();
-    renderMailList(filtered);
-    renderMailDetail(null);
-  }
-
-  function goHome() {
-    document.getElementById('main-site').style.display = 'block';
-    document.getElementById('dashboard').style.display = 'none';
-    localStorage.setItem('nx_view', 'site');
-  }
-
-  function logout() {
-    localStorage.removeItem('google_user');
-    supabaseClient.auth.signOut().finally(() => {
-      window.location.reload();
-    });
-  }
-
-  // Initialiser les champs de code OTP
-  setupOtpDigitInputs();
-
-  // Au chargement : si déjà connecté, montrer l'avatar flottant mais rester sur le site
-  const savedUser = localStorage.getItem('google_user');
-  if (savedUser) {
-    const user = JSON.parse(savedUser);
-    showFloatingAvatar(user.picture);
-  }
-
-  // Restaurer la vue mémorisée (site ou dashboard) au chargement, par exemple après un F5
-  if (localStorage.getItem('nx_view') === 'dashboard' && savedUser) {
-    goToDashboard();
-  }
-
-  // Retour après connexion Google via Supabase OAuth
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      const user = session.user;
-      const userData = {
-        name: user.user_metadata?.full_name || user.email,
-        email: user.email,
-        picture: user.user_metadata?.avatar_url || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.email)
-      };
-      localStorage.setItem('google_user', JSON.stringify(userData));
-      showFloatingAvatar(userData.picture);
-    }
-  });
-
-  // Retour après connexion Gmail (authorization code flow)
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('state') === 'gmail_connect' && urlParams.get('code')) {
-    const code = urlParams.get('code');
-    supabaseClient.auth.getSession().then(({ data }) => {
-      const session = data?.session;
-      if (!session) {
-        console.error('Pas de session Supabase au retour de Google');
-        return;
-      }
-      fetch(`${SUPABASE_URL}/functions/v1/gmail-oauth-callback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({ code, redirect_uri: REDIRECT_URI, user_id: session.user.id })
-      })
-      .then(async (r) => {
-        const body = await r.json().catch(() => ({}));
-        if (!r.ok) {
-          alert('Erreur connexion Gmail : ' + JSON.stringify(body, null, 2));
-          return;
-        }
-        console.log('Gmail connecté avec succès', body);
-        window.history.replaceState({}, document.title, window.location.pathname);
-        goToDashboard();
-      })
-      .catch((err) => {
-        console.error('Erreur réseau (probablement CORS) :', err);
-        alert('Erreur réseau lors de la connexion Gmail. Vérifie la console.');
-      });
-    });
-  }
-</script>
-
-</body>
-</html>
+      <div class="mail-list-item${selectedAutomationIndex === i ? ' active' : ''}${selectedIds.has(r.id) ? ' checked' : ''}" onclick="selectAutomation(${i})">
+        <div class="mli-row">
+          <span class="mli-checkbox-wrap">
+            <input type="checkbox" ${selectedIds.has(r.id) ? 'checked' : ''} onclick="toggleSelect('${r.id}', event)">
+          </span>
+          <div class="mli-row-content">
+            <div class="mli-top">
+              <span class="mli-sender">${escapeHtml(r.sender)}</span>
+              <span class="mli-date">${new Date(r.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</span>
