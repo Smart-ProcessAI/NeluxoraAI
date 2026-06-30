@@ -964,6 +964,35 @@
   const PLAN_LIMITS = { starter: 100, pro: 300, elite: 700 };
   const PLAN_LABELS = { starter: 'Starter', pro: 'Pro', elite: 'Elite' };
 
+  function daysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  function getBillingPeriodStart(anchorDate, now) {
+    const anchorDay = anchorDate.getDate();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let day = Math.min(anchorDay, daysInMonth(year, month));
+    let periodStart = new Date(year, month, day, anchorDate.getHours(), anchorDate.getMinutes(), anchorDate.getSeconds());
+    if (periodStart > now) {
+      month -= 1;
+      if (month < 0) { month = 11; year -= 1; }
+      day = Math.min(anchorDay, daysInMonth(year, month));
+      periodStart = new Date(year, month, day, anchorDate.getHours(), anchorDate.getMinutes(), anchorDate.getSeconds());
+    }
+    return periodStart;
+  }
+
+  function getNextRenewalDate(anchorDate, now) {
+    const periodStart = getBillingPeriodStart(anchorDate, now);
+    let year = periodStart.getFullYear();
+    let month = periodStart.getMonth() + 1;
+    if (month > 11) { month = 0; year += 1; }
+    const anchorDay = anchorDate.getDate();
+    const day = Math.min(anchorDay, daysInMonth(year, month));
+    return new Date(year, month, day, anchorDate.getHours(), anchorDate.getMinutes(), anchorDate.getSeconds());
+  }
+
   function openAccountModal() {
     document.getElementById('account-modal-overlay').style.display = 'flex';
 
@@ -973,7 +1002,7 @@
 
       document.getElementById('account-modal-email').textContent = user.email;
 
-      supabaseClient.from('gmail_connections').select('email, plan').eq('user_id', user.id).maybeSingle()
+      supabaseClient.from('gmail_connections').select('email, plan, created_at').eq('user_id', user.id).maybeSingle()
         .then(({ data: row }) => {
           const plan = row?.plan || 'starter';
           const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
@@ -982,9 +1011,13 @@
           document.getElementById('account-modal-plan').textContent = PLAN_LABELS[plan] || plan;
           document.getElementById('account-modal-quota').textContent = limit + ' emails / mois';
 
-          const now = new Date();
-          const renewalDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          document.getElementById('account-modal-renewal').textContent = renewalDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+          if (row?.created_at) {
+            const anchor = new Date(row.created_at);
+            const renewalDate = getNextRenewalDate(anchor, new Date());
+            document.getElementById('account-modal-renewal').textContent = renewalDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+          } else {
+            document.getElementById('account-modal-renewal').textContent = '—';
+          }
         });
     });
   }
@@ -1012,20 +1045,18 @@
   }
 
   function updatePlanUsage(userId) {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    supabaseClient.from('gmail_connections').select('plan').eq('user_id', userId).maybeSingle()
+    supabaseClient.from('gmail_connections').select('plan, created_at').eq('user_id', userId).maybeSingle()
       .then(({ data: connRow }) => {
         const plan = connRow?.plan || 'starter';
         const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
+        const anchor = connRow?.created_at ? new Date(connRow.created_at) : new Date();
+        const periodStart = getBillingPeriodStart(anchor, new Date());
 
         supabaseClient
           .from('email_automations')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId)
-          .gte('created_at', startOfMonth.toISOString())
+          .gte('created_at', periodStart.toISOString())
           .then(({ count }) => {
             const used = count || 0;
             const percent = Math.min(Math.round((used / limit) * 100), 100);
@@ -1041,7 +1072,7 @@
 
             const noteEl = document.getElementById('plan-usage-note');
             if (percent >= 100) {
-              noteEl.textContent = "Limite mensuelle atteinte. Les nouveaux emails ne seront plus traités jusqu'au mois prochain.";
+              noteEl.textContent = "Limite mensuelle atteinte. Les nouveaux emails ne seront plus traités jusqu'au renouvellement.";
               noteEl.style.color = '#e53e3e';
             } else if (percent >= 80) {
               noteEl.textContent = "Vous approchez de votre limite mensuelle.";
