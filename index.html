@@ -1002,23 +1002,27 @@
 
       document.getElementById('account-modal-email').textContent = user.email;
 
-      supabaseClient.from('gmail_connections').select('email, plan, created_at').eq('user_id', user.id).maybeSingle()
-        .then(({ data: row }) => {
-          const plan = row?.plan || 'starter';
-          const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
+      Promise.all([
+        supabaseClient.from('gmail_connections').select('email').eq('user_id', user.id).maybeSingle(),
+        supabaseClient.from('subscriptions').select('plan, plan_started_at').eq('user_id', user.id).maybeSingle()
+      ]).then(([gmailResult, subResult]) => {
+        const gmailRow = gmailResult.data;
+        const subRow = subResult.data;
+        const plan = subRow?.plan || 'starter';
+        const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
 
-          document.getElementById('account-modal-gmail').textContent = row?.email || 'Non connectée';
-          document.getElementById('account-modal-plan').textContent = PLAN_LABELS[plan] || plan;
-          document.getElementById('account-modal-quota').textContent = limit + ' emails / mois';
+        document.getElementById('account-modal-gmail').textContent = gmailRow?.email || 'Non connectée';
+        document.getElementById('account-modal-plan').textContent = PLAN_LABELS[plan] || plan;
+        document.getElementById('account-modal-quota').textContent = limit + ' emails / mois';
 
-          if (row?.created_at) {
-            const anchor = new Date(row.created_at);
-            const renewalDate = getNextRenewalDate(anchor, new Date());
-            document.getElementById('account-modal-renewal').textContent = renewalDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-          } else {
-            document.getElementById('account-modal-renewal').textContent = '—';
-          }
-        });
+        if (subRow?.plan_started_at) {
+          const anchor = new Date(subRow.plan_started_at);
+          const renewalDate = getNextRenewalDate(anchor, new Date());
+          document.getElementById('account-modal-renewal').textContent = renewalDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        } else {
+          document.getElementById('account-modal-renewal').textContent = '—';
+        }
+      });
     });
   }
 
@@ -1045,11 +1049,11 @@
   }
 
   function updatePlanUsage(userId) {
-    supabaseClient.from('gmail_connections').select('plan, created_at').eq('user_id', userId).maybeSingle()
-      .then(({ data: connRow }) => {
-        const plan = connRow?.plan || 'starter';
+    supabaseClient.from('subscriptions').select('plan, plan_started_at').eq('user_id', userId).maybeSingle()
+      .then(({ data: subRow }) => {
+        const plan = subRow?.plan || 'starter';
         const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
-        const anchor = connRow?.created_at ? new Date(connRow.created_at) : new Date();
+        const anchor = subRow?.plan_started_at ? new Date(subRow.plan_started_at) : new Date();
         const periodStart = getBillingPeriodStart(anchor, new Date());
 
         supabaseClient
