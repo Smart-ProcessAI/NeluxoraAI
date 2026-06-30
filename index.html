@@ -119,6 +119,10 @@
     .mail-tab { flex: 1; background: transparent; border: none; padding: 12px 8px; font-size: 12px; font-weight: 500; color: #9ca3af; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border-bottom: 2px solid transparent; }
     .mail-tab:hover { color: #534AB7; }
     .mail-tab.active { color: #534AB7; border-bottom-color: #534AB7; }
+    .mail-refresh-btn { background: transparent; border: none; color: #9ca3af; cursor: pointer; padding: 0 12px; display: flex; align-items: center; font-size: 16px; flex-shrink: 0; }
+    .mail-refresh-btn:hover { color: #534AB7; }
+    .mail-refresh-btn.spinning i { animation: nx-spin 0.7s linear infinite; }
+    @keyframes nx-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .mail-search-wrap { padding: 14px; border-bottom: 0.5px solid rgba(0,0,0,0.08); position: relative; }
     .mail-date-filter-wrap { padding: 0 14px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
     #mail-date-filter { width: 100%; padding: 7px 10px; background: #f8f9ff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 12px; color: #6b7280; outline: none; cursor: pointer; }
@@ -171,6 +175,18 @@
     .copy-btn { background: transparent; border: 0.5px solid rgba(83,74,183,0.3); color: #534AB7; font-size: 11px; padding: 3px 10px; border-radius: 6px; cursor: pointer; font-weight: 500; text-transform: none; letter-spacing: normal; }
     .copy-btn:hover { background: #EEEDFE; }
 
+    .account-modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,0.45); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+    .account-modal { background: #fff; border-radius: 14px; max-width: 420px; width: 100%; padding: 1.75rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+    .account-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .account-modal-header h3 { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+    .account-modal-close { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; padding: 4px; }
+    .account-modal-close:hover { color: #1a1a2e; }
+    .account-modal-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06); font-size: 13px; }
+    .account-modal-row:last-of-type { border-bottom: none; }
+    .account-modal-label { color: #9ca3af; }
+    .account-modal-row span:last-child { color: #1a1a2e; font-weight: 500; text-align: right; }
+    .account-modal-note { font-size: 12px; color: #9ca3af; margin-top: 1rem; line-height: 1.5; }
+
     @media (max-width: 760px) {
       #dashboard { padding: 2rem 1rem 3rem; }
       .mail-app { flex-direction: column; }
@@ -217,7 +233,7 @@
       <a onclick="toggleDashNavMore(event)">Plus <i class="ti ti-chevron-down" style="font-size:13px;"></i></a>
       <div id="dash-nav-more" class="nav-dropdown-menu">
         <button onclick="document.querySelector('#dashboard').scrollIntoView({behavior:'smooth'}); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-layout-dashboard"></i> Tableau de bord</button>
-        <button onclick="alert('Bientôt disponible.'); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-user"></i> Mon compte</button>
+        <button onclick="openAccountModal(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-user"></i> Mon compte</button>
         <button onclick="window.location.href='mailto:contact@neluxoraai.com'; document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-life-buoy"></i> Aide</button>
       </div>
     </div>
@@ -494,6 +510,7 @@
       <div class="mail-tabs">
         <button class="mail-tab active" id="tab-inbox" onclick="switchMailTab('inbox')"><i class="ti ti-inbox"></i> Boîte de réception</button>
         <button class="mail-tab" id="tab-trash" onclick="switchMailTab('trash')"><i class="ti ti-trash"></i> Corbeille</button>
+        <button class="mail-refresh-btn" id="mail-refresh-btn" title="Actualiser" onclick="refreshAutomations()"><i class="ti ti-refresh"></i></button>
       </div>
       <div class="mail-search-wrap">
         <i class="ti ti-search"></i>
@@ -523,6 +540,36 @@
     </div>
     <div class="mail-detail" id="mail-detail">
       <div class="mail-detail-empty">Sélectionnez un email dans la liste pour voir le résumé et la réponse suggérée.</div>
+    </div>
+  </div>
+
+  <div id="account-modal-overlay" class="account-modal-overlay" style="display:none;" onclick="if(event.target===this) closeAccountModal()">
+    <div class="account-modal">
+      <div class="account-modal-header">
+        <h3>Mon compte</h3>
+        <button class="account-modal-close" onclick="closeAccountModal()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="account-modal-row">
+        <span class="account-modal-label">Adresse de connexion</span>
+        <span id="account-modal-email">—</span>
+      </div>
+      <div class="account-modal-row">
+        <span class="account-modal-label">Boîte Gmail connectée</span>
+        <span id="account-modal-gmail">—</span>
+      </div>
+      <div class="account-modal-row">
+        <span class="account-modal-label">Plan actuel</span>
+        <span id="account-modal-plan">—</span>
+      </div>
+      <div class="account-modal-row">
+        <span class="account-modal-label">Quota mensuel</span>
+        <span id="account-modal-quota">—</span>
+      </div>
+      <div class="account-modal-row">
+        <span class="account-modal-label">Date de renouvellement</span>
+        <span id="account-modal-renewal">—</span>
+      </div>
+      <p class="account-modal-note">Votre quota d'emails se réinitialise automatiquement le 1er de chaque mois.</p>
     </div>
   </div>
 
@@ -904,8 +951,47 @@
     fetchAutomationsPage(page);
   }
 
+  function refreshAutomations() {
+    const btn = document.getElementById('mail-refresh-btn');
+    btn.classList.add('spinning');
+    fetchAutomationsPage(currentPage);
+    if (currentMailTab === 'inbox' && currentMailUserId) {
+      updateDashboardCounters(currentMailUserId);
+    }
+    setTimeout(() => btn.classList.remove('spinning'), 700);
+  }
+
   const PLAN_LIMITS = { starter: 100, pro: 300, elite: 700 };
   const PLAN_LABELS = { starter: 'Starter', pro: 'Pro', elite: 'Elite' };
+
+  function openAccountModal() {
+    document.getElementById('account-modal-overlay').style.display = 'flex';
+
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+
+      document.getElementById('account-modal-email').textContent = user.email;
+
+      supabaseClient.from('gmail_connections').select('email, plan').eq('user_id', user.id).maybeSingle()
+        .then(({ data: row }) => {
+          const plan = row?.plan || 'starter';
+          const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
+
+          document.getElementById('account-modal-gmail').textContent = row?.email || 'Non connectée';
+          document.getElementById('account-modal-plan').textContent = PLAN_LABELS[plan] || plan;
+          document.getElementById('account-modal-quota').textContent = limit + ' emails / mois';
+
+          const now = new Date();
+          const renewalDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          document.getElementById('account-modal-renewal').textContent = renewalDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        });
+    });
+  }
+
+  function closeAccountModal() {
+    document.getElementById('account-modal-overlay').style.display = 'none';
+  }
 
   function updateDashboardCounters(userId) {
     supabaseClient
