@@ -861,6 +861,9 @@
         return;
       }
       selectedIds.clear();
+      document.getElementById('mail-bulk-bar').style.display = 'none';
+      const selectAllCheckbox = document.getElementById('mail-select-all');
+      if (selectAllCheckbox) selectAllCheckbox.checked = false;
       loadEmailAutomations();
     });
   }
