@@ -17,6 +17,10 @@
     .nav-links { display: flex; gap: 1.5rem; }
     .nav-links a { font-size: 18px; color: #6b7280; text-decoration: none; cursor: pointer; }
     .nav-links a:hover { color: #534AB7; }
+    .nav-dropdown-wrap { position: relative; display: inline-block; }
+    .nav-dropdown-menu { display: none; position: absolute; top: 32px; left: 0; background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 8px; min-width: 170px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 20; }
+    .nav-dropdown-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; border: none; background: transparent; color: #1a1a2e; font-size: 13px; cursor: pointer; border-radius: 6px; text-align: left; }
+    .nav-dropdown-menu button:hover { background: #f8f9ff; color: #534AB7; }
     .btn-primary { background: #534AB7; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; }
     .btn-primary:hover { background: #3C3489; }
     .btn-outline { background: transparent; border: 0.5px solid rgba(0,0,0,0.15); color: #1a1a2e; padding: 8px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; }
@@ -184,10 +188,23 @@
     <img src="logoNeluxoraAI.png" height="64" alt="Neluxora AI">
     <div class="logo-text">Neluxora <span>AI</span></div>
   </div>
-  <div class="nav-links">
+  <div class="nav-links" id="site-nav-links">
     <a href="#services">Services</a>
     <a href="#tarifs">Tarifs</a>
     <a href="#connexion">Connexion</a>
+  </div>
+  <div class="nav-links" id="dash-nav-links" style="display:none;">
+    <a onclick="goToDashboardTab('inbox')">Boîte de réception</a>
+    <a onclick="goToDashboardTab('trash')">Corbeille</a>
+    <a onclick="scrollToGmailSettings()">Paramètres Gmail</a>
+    <div class="nav-dropdown-wrap">
+      <a onclick="toggleDashNavMore(event)">Plus <i class="ti ti-chevron-down" style="font-size:13px;"></i></a>
+      <div id="dash-nav-more" class="nav-dropdown-menu">
+        <button onclick="document.querySelector('#dashboard').scrollIntoView({behavior:'smooth'}); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-layout-dashboard"></i> Tableau de bord</button>
+        <button onclick="alert('Bientôt disponible.'); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-user"></i> Mon compte</button>
+        <button onclick="window.location.href='mailto:contact@neluxoraai.com'; document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-life-buoy"></i> Aide</button>
+      </div>
+    </div>
   </div>
   <button class="btn-primary" id="nav-dashboard-btn" style="display:none;" onclick="goToDashboard()">Mon tableau de bord</button>
   <button class="btn-primary" id="nav-start-btn" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Commencer</button>
@@ -621,6 +638,8 @@
     document.getElementById('avatar-menu').style.display = 'none';
     document.getElementById('main-site').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('site-nav-links').style.display = 'none';
+    document.getElementById('dash-nav-links').style.display = 'flex';
     localStorage.setItem('nx_view', 'dashboard');
 
     const savedUser = JSON.parse(localStorage.getItem('google_user') || 'null');
@@ -1005,8 +1024,35 @@
   function goHome() {
     document.getElementById('main-site').style.display = 'block';
     document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('site-nav-links').style.display = 'flex';
+    document.getElementById('dash-nav-links').style.display = 'none';
     localStorage.setItem('nx_view', 'site');
   }
+
+  function goToDashboardTab(tab) {
+    goToDashboard();
+    setTimeout(() => switchMailTab(tab), 0);
+  }
+
+  function scrollToGmailSettings() {
+    goToDashboard();
+    setTimeout(() => {
+      document.getElementById('gmail-connect-card').scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  }
+
+  function toggleDashNavMore(event) {
+    event.stopPropagation();
+    const menu = document.getElementById('dash-nav-more');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  }
+
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('dash-nav-more');
+    if (menu && !menu.contains(e.target) && menu.style.display === 'block') {
+      menu.style.display = 'none';
+    }
+  });
 
   function logout() {
     localStorage.removeItem('google_user');
