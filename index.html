@@ -228,12 +228,14 @@
   <div class="nav-links" id="dash-nav-links" style="display:none;">
     <a onclick="goToDashboardTab('inbox')">Boîte de réception</a>
     <a onclick="goToDashboardTab('trash')">Corbeille</a>
-    <a onclick="scrollToGmailSettings()">Paramètres Gmail</a>
     <div class="nav-dropdown-wrap">
       <a onclick="toggleDashNavMore(event)">Plus <i class="ti ti-chevron-down" style="font-size:13px;"></i></a>
       <div id="dash-nav-more" class="nav-dropdown-menu">
         <button onclick="document.querySelector('#dashboard').scrollIntoView({behavior:'smooth'}); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-layout-dashboard"></i> Tableau de bord</button>
         <button onclick="openAccountModal(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-user"></i> Mon compte</button>
+        <button id="menu-gmail-connect" onclick="connectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail"></i> Connecter Gmail</button>
+        <button id="menu-gmail-change" style="display:none;" onclick="connectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail"></i> Changer d'adresse Gmail</button>
+        <button id="menu-gmail-disconnect" style="display:none; color:#e53e3e;" onclick="disconnectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail-off"></i> Déconnecter Gmail</button>
         <button onclick="window.location.href='mailto:contact@neluxoraai.com'; document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-life-buoy"></i> Aide</button>
       </div>
     </div>
@@ -499,7 +501,7 @@
   <div class="dash-card" id="gmail-connect-card" style="margin-bottom:2rem;">
     <div class="label">Boîte mail Gmail</div>
     <p id="gmail-status" style="font-size:13px; color:#6b7280; margin:6px 0 12px;">Non connectée</p>
-    <button class="btn-primary" id="gmail-connect-btn" style="width:100%;" onclick="connectGmail()">Connecter ma boîte mail Gmail</button>
+    <button class="btn-primary" style="width:100%;" onclick="connectGmail()">Connecter ma boîte mail Gmail</button>
   </div>
 
   <div class="section-label" style="margin-top:2rem">Activité récente</div>
@@ -577,7 +579,7 @@
 <script>
   const CLIENT_ID = '204789491425-n0gho0te1j0bvkh6nqj8gajkgikv7589.apps.googleusercontent.com';
   const REDIRECT_URI = 'https://www.neluxoraai.com';
-  const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send';
+  const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email';
 
   // --- Supabase ---
   const SUPABASE_URL = 'https://mpekpdazuecprgfpweex.supabase.co';
@@ -799,32 +801,30 @@
   function checkGmailStatus() {
     supabaseClient.auth.getUser().then(({ data }) => {
       const user = data?.user;
+      const cardEl = document.getElementById('gmail-connect-card');
       const statusEl = document.getElementById('gmail-status');
-      const btnEl = document.getElementById('gmail-connect-btn');
+      const menuConnect = document.getElementById('menu-gmail-connect');
+      const menuChange = document.getElementById('menu-gmail-change');
+      const menuDisconnect = document.getElementById('menu-gmail-disconnect');
+
       if (!user) {
+        cardEl.style.display = 'block';
         statusEl.textContent = "Connecte ta boîte Gmail pour activer les automatisations.";
         return;
       }
       supabaseClient.from('gmail_connections').select('user_id, email').eq('user_id', user.id).maybeSingle()
         .then(({ data: row }) => {
           if (row) {
-            statusEl.textContent = "Succès, adresse mail connectée ✓" + (row.email ? " (" + row.email + ")" : "");
-            btnEl.textContent = "Changer d'adresse mail";
-            let disconnectBtn = document.getElementById('gmail-disconnect-btn');
-            if (!disconnectBtn) {
-              disconnectBtn = document.createElement('button');
-              disconnectBtn.id = 'gmail-disconnect-btn';
-              disconnectBtn.className = 'btn-outline';
-              disconnectBtn.style.cssText = 'width:100%; margin-top:8px; color:#e53e3e; border-color:#e53e3e;';
-              disconnectBtn.textContent = 'Déconnecter Gmail';
-              disconnectBtn.onclick = disconnectGmail;
-              btnEl.insertAdjacentElement('afterend', disconnectBtn);
-            }
+            cardEl.style.display = 'none';
+            menuConnect.style.display = 'none';
+            menuChange.style.display = 'flex';
+            menuDisconnect.style.display = 'flex';
           } else {
+            cardEl.style.display = 'block';
             statusEl.textContent = "Non connectée";
-            btnEl.textContent = "Connecter ma boîte mail Gmail";
-            const disconnectBtn = document.getElementById('gmail-disconnect-btn');
-            if (disconnectBtn) disconnectBtn.remove();
+            menuConnect.style.display = 'flex';
+            menuChange.style.display = 'none';
+            menuDisconnect.style.display = 'none';
           }
         });
     });
