@@ -556,6 +556,36 @@
     });
   }
 
+  function disconnectGmail() {
+    if (!confirm("Voulez-vous vraiment déconnecter votre boîte Gmail ? Les automatisations s'arrêteront immédiatement.")) return;
+
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      supabaseClient.auth.getSession().then(({ data: sessionData }) => {
+        const session = sessionData?.session;
+        if (!session) return;
+        fetch(`${SUPABASE_URL}/functions/v1/gmail-disconnect`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ user_id: user.id })
+        })
+        .then(async (r) => {
+          const body = await r.json().catch(() => ({}));
+          if (!r.ok) {
+            alert('Erreur lors de la déconnexion : ' + JSON.stringify(body));
+            return;
+          }
+          checkGmailStatus();
+        })
+        .catch(() => alert('Erreur réseau lors de la déconnexion.'));
+      });
+    });
+  }
+
   function checkGmailStatus() {
     supabaseClient.auth.getUser().then(({ data }) => {
       const user = data?.user;
@@ -570,11 +600,25 @@
           if (row) {
             statusEl.textContent = "Succès, adresse mail connectée ✓" + (row.email ? " (" + row.email + ")" : "");
             btnEl.textContent = "Changer d'adresse mail";
+            let disconnectBtn = document.getElementById('gmail-disconnect-btn');
+            if (!disconnectBtn) {
+              disconnectBtn = document.createElement('button');
+              disconnectBtn.id = 'gmail-disconnect-btn';
+              disconnectBtn.className = 'btn-outline';
+              disconnectBtn.style.cssText = 'width:100%; margin-top:8px; color:#e53e3e; border-color:#e53e3e;';
+              disconnectBtn.textContent = 'Déconnecter Gmail';
+              disconnectBtn.onclick = disconnectGmail;
+              btnEl.insertAdjacentElement('afterend', disconnectBtn);
+            }
+          } else {
+            statusEl.textContent = "Non connectée";
+            btnEl.textContent = "Connecter ma boîte mail Gmail";
+            const disconnectBtn = document.getElementById('gmail-disconnect-btn');
+            if (disconnectBtn) disconnectBtn.remove();
           }
         });
     });
   }
-
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str || '';
