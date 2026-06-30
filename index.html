@@ -45,6 +45,7 @@
     .plan-name { font-size: 13px; color: #6b7280; margin-bottom: 0.5rem; }
     .price { font-size: 32px; font-weight: 500; margin-bottom: 0.25rem; color: #1a1a2e; }
     .price span { font-size: 14px; color: #6b7280; font-weight: 400; }
+    .plan-time { font-size: 13px; color: #534AB7; font-weight: 500; margin-bottom: 0.75rem; }
     .plan-desc { font-size: 13px; color: #6b7280; margin-bottom: 1.25rem; line-height: 1.5; }
     .features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
     .features li { font-size: 13px; display: flex; align-items: center; gap: 8px; color: #1a1a2e; }
@@ -143,10 +144,10 @@
 
   <div class="hero">
     <div class="badge">Automatisation IA pour PME</div>
-    <h1>Gagnez 2 heures par jour<br>grâce à l'<span>IA</span></h1>
-    <p>Neluxora AI automatise vos tâches répétitives — emails, saisie de données, gestion de leads — pour que vous vous concentriez sur ce qui compte vraiment.</p>
+    <h1>Gagnez plusieurs heures par semaine<br>grâce à l'<span>IA</span></h1>
+    <p>Neluxora AI lit, résume et propose des réponses à vos emails automatiquement — pour que vous récupériez votre temps plutôt que de le perdre dans votre boîte de réception.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Essayer gratuitement</button>
+      <button class="btn-primary" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Essayer gratuitement 14 jours</button>
       <button class="btn-outline" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">Voir les services</button>
     </div>
   </div>
@@ -161,7 +162,7 @@
       <div class="card">
         <div class="card-icon"><i class="ti ti-mail"></i></div>
         <h3>Résumé des emails</h3>
-        <p>Chaque email entrant est automatiquement analysé et résumé en 3 points clés par l'IA.</p>
+        <p>Chaque email entrant important est automatiquement analysé et résumé par l'IA, pour que vous compreniez l'essentiel sans avoir à tout lire.</p>
       </div>
       <div class="card">
         <div class="card-icon"><i class="ti ti-send"></i></div>
@@ -172,7 +173,7 @@
       <div class="card">
         <div class="card-icon"><i class="ti ti-message-dots"></i></div>
         <h3>Suggestions de réponses</h3>
-        <p>L'IA analyse chaque email et vous propose une réponse rédigée, prête à envoyer en un clic.</p>
+        <p>L'IA analyse chaque email et vous propose une réponse rédigée, prête à relire et envoyer en un clic.</p>
         <span class="tag">Nouveau</span>
       </div>
       <div class="card">
@@ -203,8 +204,8 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-content">
-          <h3>Démo gratuite d'une semaine</h3>
-          <p>On analyse ensemble vos processus et identifie les tâches à automatiser en priorité.</p>
+          <h3>Essai gratuit de 14 jours</h3>
+          <p>On analyse ensemble vos processus et identifie les tâches à automatiser en priorité, sans carte bancaire requise.</p>
         </div>
       </div>
       <div class="step">
@@ -235,47 +236,49 @@
 
   <section id="tarifs">
     <div class="section-label">Tarifs</div>
-    <h2>Des offres claires et transparentes</h2>
-    <p class="subtitle">Pas de mauvaises surprises. Résiliez à tout moment.</p>
+    <h2>Payez pour le temps que vous récupérez</h2>
+    <p class="subtitle">Pas de mauvaises surprises. 14 jours d'essai gratuit, sans carte bancaire. Résiliez à tout moment.</p>
     <div class="pricing-grid">
       <div class="pricing-card">
         <div class="plan-name">Starter</div>
-        <div class="price">29€ <span>/ mois</span></div>
-        <div class="plan-desc">Idéal pour tester l'automatisation sur une tâche précise.</div>
+        <div class="price">19€ <span>/ mois</span></div>
+        <div class="plan-time">≈ 5h économisées / mois</div>
+        <div class="plan-desc">Idéal pour reprendre le contrôle de votre boîte mail sans y passer vos journées.</div>
         <ul class="features">
           <li><i class="ti ti-check"></i> 100 emails traités/mois</li>
-          <li><i class="ti ti-check"></i> Résumé automatique</li>
-          <li><i class="ti ti-check"></i> Google Sheets inclus</li>
+          <li><i class="ti ti-check"></i> Résumés automatiques</li>
+          <li><i class="ti ti-check"></i> Tableau de bord inclus</li>
           <li><i class="ti ti-check"></i> Support par email</li>
         </ul>
-        <button class="btn-outline" style="width:100%" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Commencer</button>
+        <button class="btn-outline" style="width:100%" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Commencer l'essai gratuit</button>
       </div>
       <div class="pricing-card featured">
         <div class="popular-badge">Le plus populaire</div>
         <div class="plan-name">Pro</div>
-        <div class="price">49€ <span>/ mois</span></div>
-        <div class="plan-desc">Pour automatiser plusieurs processus et gagner un maximum de temps.</div>
+        <div class="price">39€ <span>/ mois</span></div>
+        <div class="plan-time">≈ 15h économisées / mois</div>
+        <div class="plan-desc">Pour libérer plusieurs heures chaque semaine et ne plus rien laisser passer.</div>
         <ul class="features">
-          <li><i class="ti ti-check"></i> 500 emails traités/mois</li>
-          <li><i class="ti ti-check"></i> Résumé + suggestions de réponses</li>
-          <li><i class="ti ti-check"></i> Expédition automatique</li>
+          <li><i class="ti ti-check"></i> 300 emails traités/mois</li>
+          <li><i class="ti ti-check"></i> Résumés + suggestions de réponses</li>
           <li><i class="ti ti-check"></i> Tableau de bord avancé</li>
           <li><i class="ti ti-check"></i> Support prioritaire</li>
         </ul>
         <button class="btn-primary" style="width:100%" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Choisir Pro</button>
       </div>
       <div class="pricing-card">
-        <div class="plan-name">Business</div>
-        <div class="price">99€ <span>/ mois</span></div>
-        <div class="plan-desc">Pour les entreprises avec un volume élevé d'emails et de processus.</div>
+        <div class="plan-name">Elite</div>
+        <div class="price">79€ <span>/ mois</span></div>
+        <div class="plan-time">≈ 35h économisées / mois</div>
+        <div class="plan-desc">Pour les entreprises avec un volume élevé d'emails, qui veulent une boîte mail qui tourne toute seule.</div>
         <ul class="features">
-          <li><i class="ti ti-check"></i> Emails illimités</li>
+          <li><i class="ti ti-check"></i> 700 emails traités/mois</li>
           <li><i class="ti ti-check"></i> Toutes les fonctionnalités Pro</li>
           <li><i class="ti ti-check"></i> Automatisations sur mesure</li>
           <li><i class="ti ti-check"></i> Onboarding dédié</li>
           <li><i class="ti ti-check"></i> Support 7j/7</li>
         </ul>
-        <button class="btn-outline" style="width:100%">Contacter</button>
+        <button class="btn-outline" style="width:100%" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Choisir Elite</button>
       </div>
     </div>
   </section>
@@ -331,8 +334,8 @@
   </section>
 
   <div class="cta-section">
-    <h2>Prêt à gagner du temps ?</h2>
-    <p>Essayez Neluxora AI gratuitement pendant 7 jours — sans carte bancaire.</p>
+    <h2>Prêt à récupérer votre temps ?</h2>
+    <p>Essayez Neluxora AI gratuitement pendant 14 jours — sans carte bancaire.</p>
     <button class="btn-primary" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Démarrer l'essai gratuit</button>
   </div>
 
@@ -604,7 +607,7 @@
           if (values[0]) values[0].textContent = rows.length;
           if (values[1]) values[1].textContent = rows.length;
           if (values[2]) values[2].textContent = rows.filter(r => r.suggested_reply).length;
-          if (values[3]) values[3].textContent = Math.round(rows.length * 2 / 60 * 10) / 10 + 'h';
+          if (values[3]) values[3].textContent = Math.round(rows.length * 3 / 60 * 10) / 10 + 'h';
 
           if (rows.length === 0) {
             listEl.innerHTML = '<p style="color:#9ca3af; font-size:14px;">Aucun email traité pour le moment.</p>';
@@ -665,7 +668,21 @@
     showFloatingAvatar(user.picture);
   }
 
-// Retour après connexion Gmail (authorization code flow)
+  // Retour après connexion Google via Supabase OAuth
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      const user = session.user;
+      const userData = {
+        name: user.user_metadata?.full_name || user.email,
+        email: user.email,
+        picture: user.user_metadata?.avatar_url || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.email)
+      };
+      localStorage.setItem('google_user', JSON.stringify(userData));
+      showFloatingAvatar(userData.picture);
+    }
+  });
+
+  // Retour après connexion Gmail (authorization code flow)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('state') === 'gmail_connect' && urlParams.get('code')) {
     const code = urlParams.get('code');
@@ -699,20 +716,8 @@
       });
     });
   }
-  // Retour après connexion Google via Supabase OAuth
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      const user = session.user;
-      const userData = {
-        name: user.user_metadata?.full_name || user.email,
-        email: user.email,
-        picture: user.user_metadata?.avatar_url || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.email)
-      };
-      localStorage.setItem('google_user', JSON.stringify(userData));
-      showFloatingAvatar(userData.picture);
-    }
-  });
 </script>
 
 </body>
 </html>
+
