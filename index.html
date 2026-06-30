@@ -86,6 +86,8 @@
     #floating-avatar { display: none; position: fixed; bottom: 24px; left: 24px; z-index: 100; }
     #floating-avatar img { width: 48px; height: 48px; border-radius: 50%; border: 3px solid #534AB7; cursor: pointer; box-shadow: 0 4px 16px rgba(83,74,183,0.3); transition: transform 0.2s; }
     #floating-avatar img:hover { transform: scale(1.08); }
+    .new-badge { position: absolute; top: -4px; right: -4px; background: #e53e3e; color: #fff; font-size: 10px; font-weight: 600; min-width: 18px; height: 18px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 4px; cursor: pointer; box-shadow: 0 0 0 2px #fff; }
+    .nav-badge { position: absolute; top: -7px; right: -7px; box-shadow: 0 0 0 2px #534AB7; }
     #avatar-menu { display: none; position: absolute; bottom: 60px; left: 0; background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 8px; min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
     #avatar-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; border: none; background: transparent; color: #1a1a2e; font-size: 13px; cursor: pointer; border-radius: 6px; }
     #avatar-menu button:hover { background: #f8f9ff; color: #534AB7; }
@@ -105,6 +107,10 @@
     .dash-card .label { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
     .dash-card .value { font-size: 30px; font-weight: 500; color: #534AB7; }
     .dash-card .sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .plan-usage-bar-wrap { width: 100%; height: 8px; background: #f0f0fa; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .plan-usage-bar-fill { height: 100%; border-radius: 999px; background: #534AB7; transition: width 0.3s, background 0.3s; }
+    .plan-usage-bar-fill.warning { background: #e6a23c; }
+    .plan-usage-bar-fill.danger { background: #e53e3e; }
 
     /* Mail app dashboard */
     .mail-app { display: flex; width: 100%; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; min-height: 600px; }
@@ -114,6 +120,9 @@
     .mail-tab:hover { color: #534AB7; }
     .mail-tab.active { color: #534AB7; border-bottom-color: #534AB7; }
     .mail-search-wrap { padding: 14px; border-bottom: 0.5px solid rgba(0,0,0,0.08); position: relative; }
+    .mail-date-filter-wrap { padding: 0 14px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
+    #mail-date-filter { width: 100%; padding: 7px 10px; background: #f8f9ff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 12px; color: #6b7280; outline: none; cursor: pointer; }
+    #mail-date-filter:focus { border-color: #534AB7; }
     .mail-search-wrap i { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 15px; pointer-events: none; }
     #mail-search { width: 100%; padding: 10px 12px 10px 36px; background: #f8f9ff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 13px; outline: none; }
     #mail-search:focus { border-color: #534AB7; }
@@ -145,6 +154,8 @@
     .mli-restore-btn:hover { background: #EEEDFE; }
     .mli-days-left { font-size: 10px; color: #9ca3af; }
     .mail-empty { padding: 2rem 1rem; text-align: center; color: #9ca3af; font-size: 13px; }
+    .load-more-btn { display: block; width: calc(100% - 32px); margin: 12px 16px; padding: 9px; background: transparent; border: 0.5px solid rgba(83,74,183,0.3); color: #534AB7; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; }
+    .load-more-btn:hover { background: #EEEDFE; }
     .mail-detail { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; max-height: 600px; }
     .mail-detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 13px; text-align: center; padding: 2rem; }
     .mail-detail-subject { font-size: 21px; font-weight: 500; color: #1a1a2e; margin-bottom: 6px; }
@@ -181,6 +192,7 @@
     <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i> Se déconnecter</button>
   </div>
   <img id="floating-avatar-img" src="" alt="Profil" onclick="toggleMenu()" title="Mon compte">
+  <span id="new-badge" class="new-badge" style="display:none;" onclick="goToDashboard()">0</span>
 </div>
 
 <nav>
@@ -206,7 +218,7 @@
       </div>
     </div>
   </div>
-  <button class="btn-primary" id="nav-dashboard-btn" style="display:none;" onclick="goToDashboard()">Mon tableau de bord</button>
+  <button class="btn-primary" id="nav-dashboard-btn" style="display:none; position:relative;" onclick="goToDashboard()">Mon tableau de bord<span id="nav-new-badge" class="new-badge nav-badge" style="display:none;">0</span></button>
   <button class="btn-primary" id="nav-start-btn" onclick="document.getElementById('connexion').scrollIntoView({behavior:'smooth'})">Commencer</button>
 </nav>
 
@@ -452,6 +464,18 @@
       <div class="sub">estimé</div>
     </div>
   </div>
+
+  <div class="dash-card" id="plan-usage-card" style="margin-bottom:2rem;">
+    <div class="label" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Utilisation du plan <strong id="plan-name-label" style="color:#534AB7;"></strong></span>
+      <span id="plan-usage-text" style="color:#1a1a2e; font-weight:500;"></span>
+    </div>
+    <div class="plan-usage-bar-wrap">
+      <div class="plan-usage-bar-fill" id="plan-usage-bar-fill"></div>
+    </div>
+    <p class="sub" id="plan-usage-note" style="margin-top:6px;"></p>
+  </div>
+
   <div class="dash-card" id="gmail-connect-card" style="margin-bottom:2rem;">
     <div class="label">Boîte mail Gmail</div>
     <p id="gmail-status" style="font-size:13px; color:#6b7280; margin:6px 0 12px;">Non connectée</p>
@@ -470,6 +494,14 @@
       <div class="mail-search-wrap">
         <i class="ti ti-search"></i>
         <input type="text" id="mail-search" placeholder="Rechercher un email, un expéditeur..." oninput="filterAutomations()">
+      </div>
+      <div class="mail-date-filter-wrap">
+        <select id="mail-date-filter" onchange="filterAutomations()">
+          <option value="all">Toutes les dates</option>
+          <option value="today">Aujourd'hui</option>
+          <option value="week">Cette semaine</option>
+          <option value="month">Ce mois-ci</option>
+        </select>
       </div>
       <div class="mail-bulk-bar" id="mail-bulk-bar" style="display:none;">
         <label class="mli-checkbox-wrap">
@@ -770,36 +802,103 @@
     loadEmailAutomations();
   }
 
+  const PAGE_SIZE = 30;
+  let currentOffset = 0;
+  let hasMoreAutomations = false;
+
+  function checkNewAutomationsBadge() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      const lastSeen = localStorage.getItem('nx_last_seen_' + user.id) || '1970-01-01T00:00:00.000Z';
+      supabaseClient
+        .from('email_automations')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .gt('created_at', lastSeen)
+        .then(({ count }) => {
+          setNewBadge(count || 0);
+        });
+    });
+  }
+
+  function setNewBadge(count) {
+    const avatarBadge = document.getElementById('new-badge');
+    const navBadge = document.getElementById('nav-new-badge');
+    [avatarBadge, navBadge].forEach(el => {
+      if (!el) return;
+      if (count > 0) {
+        el.textContent = count > 99 ? '99+' : count;
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  function markAutomationsAsSeen() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      localStorage.setItem('nx_last_seen_' + user.id, new Date().toISOString());
+      setNewBadge(0);
+    });
+  }
+
   function loadEmailAutomations() {
     supabaseClient.auth.getUser().then(({ data }) => {
       const user = data?.user;
       if (!user) return;
 
-      let query = supabaseClient
-        .from('email_automations')
-        .select('id, subject, sender, summary, suggested_reply, created_at, deleted_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      currentOffset = 0;
+      allAutomations = [];
 
-      query = currentMailTab === 'trash' ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null);
+      fetchAutomationsPage(user.id, true);
 
-      query.then(({ data: rows, error }) => {
-        if (error || !rows) {
-          document.getElementById('mail-list').innerHTML = '<div class="mail-empty">Erreur de chargement.</div>';
-          return;
-        }
-
-        allAutomations = rows;
-        selectedAutomationIndex = null;
-        renderMailList(allAutomations);
-        renderMailDetail(null);
-
-        if (currentMailTab === 'inbox') {
-          updateDashboardCounters(user.id);
-        }
-      });
+      if (currentMailTab === 'inbox') {
+        updateDashboardCounters(user.id);
+        markAutomationsAsSeen();
+      }
     });
   }
+
+  function fetchAutomationsPage(userId, isFirstLoad) {
+    let query = supabaseClient
+      .from('email_automations')
+      .select('id, subject, sender, summary, suggested_reply, created_at, deleted_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(currentOffset, currentOffset + PAGE_SIZE - 1);
+
+    query = currentMailTab === 'trash' ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null);
+
+    query.then(({ data: rows, error }) => {
+      if (error || !rows) {
+        if (isFirstLoad) document.getElementById('mail-list').innerHTML = '<div class="mail-empty">Erreur de chargement.</div>';
+        return;
+      }
+
+      hasMoreAutomations = rows.length === PAGE_SIZE;
+      currentOffset += rows.length;
+      allAutomations = allAutomations.concat(rows);
+
+      selectedAutomationIndex = null;
+      renderMailList(allAutomations);
+      if (isFirstLoad) renderMailDetail(null);
+    });
+  }
+
+  function loadMoreAutomations() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      fetchAutomationsPage(user.id, false);
+    });
+  }
+
+  const PLAN_LIMITS = { starter: 100, pro: 300, elite: 700 };
+  const PLAN_LABELS = { starter: 'Starter', pro: 'Pro', elite: 'Elite' };
 
   function updateDashboardCounters(userId) {
     supabaseClient
@@ -814,6 +913,50 @@
         if (values[1]) values[1].textContent = rows.length;
         if (values[2]) values[2].textContent = rows.filter(r => r.suggested_reply).length;
         if (values[3]) values[3].textContent = Math.round(rows.length * 3 / 60 * 10) / 10 + 'h';
+      });
+
+    updatePlanUsage(userId);
+  }
+
+  function updatePlanUsage(userId) {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    supabaseClient.from('gmail_connections').select('plan').eq('user_id', userId).maybeSingle()
+      .then(({ data: connRow }) => {
+        const plan = connRow?.plan || 'starter';
+        const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
+
+        supabaseClient
+          .from('email_automations')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .gte('created_at', startOfMonth.toISOString())
+          .then(({ count }) => {
+            const used = count || 0;
+            const percent = Math.min(Math.round((used / limit) * 100), 100);
+
+            document.getElementById('plan-name-label').textContent = PLAN_LABELS[plan] || plan;
+            document.getElementById('plan-usage-text').textContent = used + ' / ' + limit + ' emails ce mois-ci';
+
+            const fillEl = document.getElementById('plan-usage-bar-fill');
+            fillEl.style.width = percent + '%';
+            fillEl.classList.remove('warning', 'danger');
+            if (percent >= 100) fillEl.classList.add('danger');
+            else if (percent >= 80) fillEl.classList.add('warning');
+
+            const noteEl = document.getElementById('plan-usage-note');
+            if (percent >= 100) {
+              noteEl.textContent = "Limite mensuelle atteinte. Les nouveaux emails ne seront plus traités jusqu'au mois prochain.";
+              noteEl.style.color = '#e53e3e';
+            } else if (percent >= 80) {
+              noteEl.textContent = "Vous approchez de votre limite mensuelle.";
+              noteEl.style.color = '#e6a23c';
+            } else {
+              noteEl.textContent = '';
+            }
+          });
       });
   }
 
@@ -920,7 +1063,9 @@
           </div>
         </div>
       </div>
-    `).join('');
+    `).join('') + (hasMoreAutomations && !(document.getElementById('mail-search').value || '').trim() && document.getElementById('mail-date-filter').value === 'all'
+      ? `<button class="load-more-btn" onclick="loadMoreAutomations()">Charger plus d'emails</button>`
+      : '');
 
     updateBulkBar();
   }
@@ -1005,8 +1150,26 @@
 
   function getFilteredAutomations() {
     const query = (document.getElementById('mail-search').value || '').trim().toLowerCase();
-    if (!query) return allAutomations;
-    return allAutomations.filter(r =>
+    const dateFilter = document.getElementById('mail-date-filter').value;
+
+    let rows = allAutomations;
+
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      let cutoff;
+      if (dateFilter === 'today') {
+        cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (dateFilter === 'week') {
+        cutoff = new Date(now);
+        cutoff.setDate(cutoff.getDate() - 7);
+      } else if (dateFilter === 'month') {
+        cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      rows = rows.filter(r => new Date(r.created_at) >= cutoff);
+    }
+
+    if (!query) return rows;
+    return rows.filter(r =>
       (r.subject || '').toLowerCase().includes(query) ||
       (r.sender || '').toLowerCase().includes(query) ||
       (r.summary || '').toLowerCase().includes(query) ||
@@ -1069,6 +1232,7 @@
   if (savedUser) {
     const user = JSON.parse(savedUser);
     showFloatingAvatar(user.picture);
+    checkNewAutomationsBadge();
   }
 
   // Restaurer la vue mémorisée (site ou dashboard) au chargement, par exemple après un F5
