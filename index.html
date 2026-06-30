@@ -581,14 +581,33 @@
     document.getElementById('avatar-menu').style.display = 'none';
     document.getElementById('main-site').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-    const user = JSON.parse(localStorage.getItem('google_user'));
-    if (user) {
-      document.getElementById('user-name').textContent = user.name;
-      document.getElementById('user-email').textContent = user.email;
-      document.getElementById('user-avatar').src = user.picture;
+
+    const savedUser = JSON.parse(localStorage.getItem('google_user') || 'null');
+    if (savedUser) {
+      document.getElementById('user-name').textContent = savedUser.name;
+      document.getElementById('user-email').textContent = savedUser.email;
+      document.getElementById('user-avatar').src = savedUser.picture;
       checkGmailStatus();
       loadEmailAutomations();
+      return;
     }
+
+    // Fallback : localStorage vide, on récupère l'utilisateur directement depuis Supabase
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      const userData = {
+        name: user.user_metadata?.full_name || user.email,
+        email: user.email,
+        picture: user.user_metadata?.avatar_url || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.email)
+      };
+      localStorage.setItem('google_user', JSON.stringify(userData));
+      document.getElementById('user-name').textContent = userData.name;
+      document.getElementById('user-email').textContent = userData.email;
+      document.getElementById('user-avatar').src = userData.picture;
+      checkGmailStatus();
+      loadEmailAutomations();
+    });
   }
   function connectGmail() {
     supabaseClient.auth.getUser().then(({ data }) => {
