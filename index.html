@@ -574,6 +574,9 @@
         <button class="mail-bulk-cancel" onclick="clearSelection()">Annuler</button>
       </div>
       <div class="mail-count" id="mail-count"></div>
+      <div id="empty-trash-bar" style="display:none; padding:8px 16px; border-bottom:0.5px solid rgba(0,0,0,0.08);">
+        <button class="btn-outline" style="width:100%; font-size:12px; color:#e53e3e; border-color:#e53e3e;" onclick="emptyTrash()"><i class="ti ti-trash-x"></i> Vider la corbeille</button>
+      </div>
       <div class="mail-list" id="mail-list">
         <div class="mail-empty">Chargement...</div>
       </div>
@@ -1041,7 +1044,8 @@
     } else if (currentMailTab === 'folder' && currentFolderId) {
       query = query.is('deleted_at', null).eq('folder_id', currentFolderId);
     } else {
-      query = query.is('deleted_at', null);
+      // Boîte de réception : exclure les emails dans un dossier
+      query = query.is('deleted_at', null).is('folder_id', null);
     }
 
     query.then(({ data: rows, count, error }) => {
@@ -1064,6 +1068,19 @@
     const totalPages = Math.max(Math.ceil(totalAutomationsCount / PAGE_SIZE), 1);
     if (page < 1 || page > totalPages) return;
     fetchAutomationsPage(page);
+  }
+
+  function emptyTrash() {
+    if (!confirm('Supprimer définitivement tous les emails de la corbeille ? Cette action est irréversible.')) return;
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      supabaseClient.from('email_automations')
+        .delete()
+        .eq('user_id', user.id)
+        .not('deleted_at', 'is', null)
+        .then(() => loadEmailAutomations());
+    });
   }
 
   function refreshAutomations() {
@@ -1278,6 +1295,9 @@
     const countEl = document.getElementById('mail-count');
     countEl.textContent = totalAutomationsCount + ' email' + (totalAutomationsCount > 1 ? 's' : '') + ' au total';
 
+    const trashBar = document.getElementById('empty-trash-bar');
+    if (trashBar) trashBar.style.display = currentMailTab === 'trash' && totalAutomationsCount > 0 ? 'block' : 'none';
+
     if (rows.length === 0) {
       listEl.innerHTML = `<div class="mail-empty">${currentMailTab === 'trash' ? 'La corbeille est vide.' : currentMailTab === 'starred' ? 'Aucun favori pour le moment.' : currentMailTab === 'folder' ? 'Ce dossier est vide.' : 'Aucun email ne correspond.'}</div>`;
       renderPaginationControls();
@@ -1393,7 +1413,7 @@
 
     const folderBtnLabel = allFolders.length > 0
       ? `<div class="move-to-folder-wrap">
-           <button class="btn-outline" style="font-size:12px; padding:5px 12px;" onclick="toggleMoveToFolderMenu(this, '${row.id}')"><i class="ti ti-folder"></i> Déplacer</button>
+           <button class="btn-outline" style="font-size:13px; padding:8px 16px;" onclick="toggleMoveToFolderMenu(this, '${row.id}')"><i class="ti ti-folder"></i> Déplacer</button>
            <div class="move-to-folder-menu">
              <button onclick="moveToFolder('${row.id}', null); this.closest('.move-to-folder-menu').style.display='none'"><i class="ti ti-inbox"></i> Boîte de réception</button>
              ${allFolders.map(f => `<button onclick="moveToFolder('${row.id}', '${f.id}'); this.closest('.move-to-folder-menu').style.display='none'"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${f.color};margin-right:4px;"></span>${escapeHtml(f.name)}</button>`).join('')}
@@ -1422,17 +1442,17 @@
         </div>
         <div class="mail-block-content">${escapeHtml(row.suggested_reply) || 'Aucune réponse suggérée.'}</div>
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;">
-        <button class="btn-outline" style="font-size:12px; padding:5px 12px; color:${row.is_starred ? '#f59e0b' : ''}; border-color:${row.is_starred ? '#f59e0b' : ''};" onclick="toggleStar('${row.id}', ${row.is_starred}); this.closest('.mail-detail').innerHTML = ''; loadEmailAutomations();">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1.25rem; padding-top:1.25rem; border-top:0.5px solid rgba(0,0,0,0.06);">
+        <button class="btn-outline" style="font-size:13px; padding:8px 16px; color:${row.is_starred ? '#f59e0b' : ''}; border-color:${row.is_starred ? '#f59e0b' : ''};" onclick="toggleStar('${row.id}', ${row.is_starred}); loadEmailAutomations();">
           <i class="ti ti-star${row.is_starred ? '-filled' : ''}"></i> ${row.is_starred ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         </button>
-        <button class="btn-outline" style="font-size:12px; padding:5px 12px;" onclick="markAsUnread('${row.id}')">
+        <button class="btn-outline" style="font-size:13px; padding:8px 16px;" onclick="markAsUnread('${row.id}')">
           <i class="ti ti-mail"></i> Marquer non lu
         </button>
         ${folderBtnLabel}
         ${currentMailTab === 'trash'
-          ? `<button class="btn-outline" onclick="restoreAutomation('${row.id}')"><i class="ti ti-arrow-back-up"></i> Restaurer</button>`
-          : `<button class="btn-outline" style="color:#e53e3e; border-color:#e53e3e;" onclick="trashAutomation('${row.id}')"><i class="ti ti-trash"></i> Corbeille</button>`
+          ? `<button class="btn-outline" style="font-size:13px; padding:8px 16px;" onclick="restoreAutomation('${row.id}')"><i class="ti ti-arrow-back-up"></i> Restaurer</button>`
+          : `<button class="btn-outline" style="font-size:13px; padding:8px 16px; color:#e53e3e; border-color:#e53e3e;" onclick="trashAutomation('${row.id}')"><i class="ti ti-trash"></i> Corbeille</button>`
         }
       </div>
     `;
