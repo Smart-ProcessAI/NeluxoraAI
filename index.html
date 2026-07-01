@@ -113,7 +113,7 @@
     .plan-usage-bar-fill.danger { background: #e53e3e; }
 
     /* Mail app dashboard */
-    .mail-app { display: flex; width: 100%; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; min-height: 600px; }
+    .mail-app { display: flex; width: 100%; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
     .mail-sidebar { width: 32%; min-width: 320px; max-width: 460px; border-right: 0.5px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; }
     .mail-tabs { display: flex; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
     .mail-tab { flex: 1; background: transparent; border: none; padding: 12px 8px; font-size: 12px; font-weight: 500; color: #9ca3af; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border-bottom: 2px solid transparent; }
@@ -202,7 +202,7 @@
     .move-to-folder-menu { display: none; position: absolute; top: 36px; left: 0; background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 8px; min-width: 160px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 20; }
     .move-to-folder-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: none; background: transparent; color: #1a1a2e; font-size: 12px; cursor: pointer; border-radius: 6px; text-align: left; }
     .move-to-folder-menu button:hover { background: #f8f9ff; color: #534AB7; }
-    .mail-detail { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; min-height: 300px; }
+    .mail-detail { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
     .mail-detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 13px; text-align: center; padding: 2rem; }
     .mail-detail-subject { font-size: 21px; font-weight: 500; color: #1a1a2e; margin-bottom: 6px; }
     .mail-detail-meta { font-size: 12px; color: #9ca3af; margin-bottom: 1.75rem; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -1750,6 +1750,8 @@
         alert('Erreur réseau lors de la connexion Gmail. Vérifie la console.');
       });
     });
+  }
+
   // Exposer les fonctions appelées depuis le HTML dynamique (innerHTML)
   window.restoreAutomation = restoreAutomation;
   window.trashAutomation = trashAutomation;
@@ -1759,7 +1761,8 @@
   window.toggleMoveToFolderMenu = toggleMoveToFolderMenu;
   window.emptyTrash = emptyTrash;
   window.toggleSelect = toggleSelect;
-}
+  window.selectAutomation = selectAutomation;
+  window.goToAutomationsPage = goToAutomationsPage;
 </script>
 
 </body>
