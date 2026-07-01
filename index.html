@@ -9,7 +9,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9ff; color: #1a1a2e; }
+    :root {
+      --bg: #f8f9ff; --bg2: #ffffff; --bg3: #fafafa; --text: #1a1a2e; --text2: #6b7280; --text3: #9ca3af;
+      --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.15); --accent: #534AB7; --accent-bg: #EEEDFE;
+      --accent-hover: #3C3489;
+    }
+    body.dark {
+      --bg: #111827; --bg2: #1f2937; --bg3: #1a2332; --text: #f9fafb; --text2: #9ca3af; --text3: #6b7280;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15); --accent: #7c6fd4; --accent-bg: #2d2a4a;
+      --accent-hover: #9b8ee0;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
     nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 0.5px solid rgba(0,0,0,0.08); background: #ffffff; position: sticky; top: 0; z-index: 10; }
     .logo-wrap { display: flex; align-items: center; gap: 10px; }
     .logo-text { font-size: 18px; font-weight: 500; color: #1a1a2e; }
@@ -237,6 +247,54 @@
     .account-modal-row span:last-child { color: #1a1a2e; font-weight: 500; text-align: right; }
     .account-modal-note { font-size: 12px; color: #9ca3af; margin-top: 1rem; line-height: 1.5; }
 
+    /* ── Mode sombre ────────────────────────────────────────────────── */
+    body.dark nav, body.dark .card, body.dark .pricing-card, body.dark .login-card,
+    body.dark .dash-card, body.dark .mail-app, body.dark .mail-sidebar,
+    body.dark .account-modal, body.dark .folder-modal, body.dark .mail-nav,
+    body.dark .user-banner, body.dark #gmail-connect-card, body.dark #plan-usage-card,
+    body.dark .automations-table { background: #1f2937; border-color: rgba(255,255,255,0.08); }
+    body.dark .mail-nav { background: #1a2332; }
+    body.dark footer, body.dark .cta-section { background: #111827; }
+    body.dark h1, body.dark h2, body.dark h3, body.dark h4,
+    body.dark .logo-text, body.dark .plan-name, body.dark .price,
+    body.dark .step-content h3, body.dark .card h3,
+    body.dark .features li, body.dark .mail-detail-subject { color: #f9fafb; }
+    body.dark .hero p, body.dark .subtitle, body.dark .card p, body.dark .plan-desc,
+    body.dark .nav-links a, body.dark .user-info p, body.dark .dash-card .label,
+    body.dark .dash-card .sub, body.dark .mli-sender, body.dark .mli-snippet,
+    body.dark .mail-detail-meta, body.dark .step-content p, body.dark .perk,
+    body.dark .mail-count, body.dark .mail-nav-btn,
+    body.dark .mail-folder-item { color: #9ca3af; }
+    body.dark .mail-list-item { border-bottom-color: rgba(255,255,255,0.06); }
+    body.dark .mail-list-item:hover { background: #2d3748; }
+    body.dark .mail-list-item.active, body.dark .mail-list-item.checked { background: #2d2a4a; }
+    body.dark .mail-list-item.unread .mli-subject,
+    body.dark .mail-list-item.unread .mli-sender { color: #f9fafb; }
+    body.dark .mli-subject { color: #e5e7eb; }
+    body.dark #mail-search, body.dark #mail-date-filter, body.dark input[type="email"],
+    body.dark .folder-modal input { background: #374151; border-color: rgba(255,255,255,0.12); color: #f9fafb; }
+    body.dark #mail-search::placeholder, body.dark input::placeholder { color: #6b7280; }
+    body.dark .mail-block-content { background: #374151; border-color: rgba(255,255,255,0.06); color: #e5e7eb; }
+    body.dark .btn-outline { border-color: rgba(255,255,255,0.15); color: #e5e7eb; }
+    body.dark .btn-outline:hover { border-color: #7c6fd4; color: #7c6fd4; background: #2d2a4a; }
+    body.dark .mail-nav-btn:hover, body.dark .mail-nav-btn.active,
+    body.dark .mail-folder-item:hover, body.dark .mail-folder-item.active { background: #2d2a4a; color: #9b8ee0; }
+    body.dark .plan-usage-bar-wrap { background: #374151; }
+    body.dark .account-modal-row { border-bottom-color: rgba(255,255,255,0.06); }
+    body.dark .account-modal-row span:last-child { color: #f9fafb; }
+    body.dark .mail-nav-separator { background: rgba(255,255,255,0.08); }
+    body.dark .nav-dropdown-menu { background: #1f2937; border-color: rgba(255,255,255,0.1); }
+    body.dark .nav-dropdown-menu button { color: #e5e7eb; }
+    body.dark .nav-dropdown-menu button:hover { background: #374151; color: #9b8ee0; }
+    body.dark .pricing-card.featured { border-color: #7c6fd4; }
+    body.dark .badge, body.dark .popular-badge, body.dark .tag { background: #2d2a4a; }
+    body.dark .divider { border-top-color: rgba(255,255,255,0.06); }
+    body.dark .mail-bulk-bar { background: #2d2a4a; }
+    body.dark .move-to-folder-menu { background: #1f2937; border-color: rgba(255,255,255,0.1); }
+    body.dark .move-to-folder-menu button { color: #e5e7eb; }
+    body.dark .move-to-folder-menu button:hover { background: #374151; }
+    body.dark .otp-inputs input { background: #374151; border-color: rgba(255,255,255,0.12); color: #f9fafb; }
+
     @media (max-width: 760px) {
       #dashboard { padding: 2rem 1rem 3rem; }
       .mail-app { flex-direction: column; }
@@ -286,6 +344,7 @@
         <button id="menu-gmail-connect" onclick="connectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail"></i> Connecter Gmail</button>
         <button id="menu-gmail-change" style="display:none;" onclick="connectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail"></i> Changer d'adresse Gmail</button>
         <button id="menu-gmail-disconnect" style="display:none; color:#e53e3e;" onclick="disconnectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail-off"></i> Déconnecter Gmail</button>
+        <button id="dark-mode-btn" onclick="toggleDarkMode(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-moon"></i> Mode sombre</button>
         <button onclick="window.location.href='mailto:contact@neluxoraai.com'; document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-life-buoy"></i> Aide</button>
       </div>
     </div>
@@ -1536,39 +1595,70 @@
   }
 
   function getFilteredAutomations() {
-    const query = (document.getElementById('mail-search').value || '').trim().toLowerCase();
+    // Utilisé uniquement pour les filtres de date en mémoire (sans recherche texte)
     const dateFilter = document.getElementById('mail-date-filter').value;
-
     let rows = allAutomations;
-
     if (dateFilter !== 'all') {
       const now = new Date();
       let cutoff;
-      if (dateFilter === 'today') {
-        cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else if (dateFilter === 'week') {
-        cutoff = new Date(now);
-        cutoff.setDate(cutoff.getDate() - 7);
-      } else if (dateFilter === 'month') {
-        cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
-      }
+      if (dateFilter === 'today') cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      else if (dateFilter === 'week') { cutoff = new Date(now); cutoff.setDate(cutoff.getDate() - 7); }
+      else if (dateFilter === 'month') cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
       rows = rows.filter(r => new Date(r.created_at) >= cutoff);
     }
-
-    if (!query) return rows;
-    return rows.filter(r =>
-      (r.subject || '').toLowerCase().includes(query) ||
-      (r.sender || '').toLowerCase().includes(query) ||
-      (r.summary || '').toLowerCase().includes(query) ||
-      (r.suggested_reply || '').toLowerCase().includes(query)
-    );
+    return rows;
   }
 
+  let searchDebounceTimer = null;
+
   function filterAutomations() {
-    selectedAutomationIndex = null;
-    const filtered = getFilteredAutomations();
-    renderMailList(filtered);
-    renderMailDetail(null);
+    const query = (document.getElementById('mail-search').value || '').trim();
+    clearTimeout(searchDebounceTimer);
+
+    if (!query) {
+      // Pas de recherche : on recharge normalement avec les filtres de date
+      selectedAutomationIndex = null;
+      renderMailDetail(null);
+      loadEmailAutomations();
+      return;
+    }
+
+    // Recherche globale : on attend 400ms que l'utilisateur arrête de taper
+    searchDebounceTimer = setTimeout(() => {
+      selectedAutomationIndex = null;
+      renderMailDetail(null);
+      globalSearch(query);
+    }, 400);
+  }
+
+  function globalSearch(query) {
+    if (!currentMailUserId) return;
+
+    const dateFilter = document.getElementById('mail-date-filter').value;
+    const now = new Date();
+    let cutoff = null;
+    if (dateFilter === 'today') cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    else if (dateFilter === 'week') { cutoff = new Date(now); cutoff.setDate(cutoff.getDate() - 7); }
+    else if (dateFilter === 'month') cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Recherche côté Supabase avec ilike (insensible à la casse) sur sujet + expéditeur + résumé
+    let q = supabaseClient
+      .from('email_automations')
+      .select('id, subject, sender, summary, suggested_reply, created_at, deleted_at, is_starred, is_read, folder_id, priority', { count: 'exact' })
+      .eq('user_id', currentMailUserId)
+      .is('deleted_at', null)
+      .or(`subject.ilike.%${query}%,sender.ilike.%${query}%,summary.ilike.%${query}%,suggested_reply.ilike.%${query}%`)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (cutoff) q = q.gte('created_at', cutoff.toISOString());
+
+    q.then(({ data: rows, count, error }) => {
+      if (error) return;
+      totalAutomationsCount = count || 0;
+      allAutomations = rows || [];
+      renderMailList(allAutomations);
+    });
   }
 
   // ── Favoris ──────────────────────────────────────────────────────────
@@ -1794,6 +1884,75 @@
   }
 
   // Exposer les fonctions appelées depuis le HTML dynamique (innerHTML)
+  // ── Mode sombre ────────────────────────────────────────────────────────
+  function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark');
+    localStorage.setItem('nx_dark', isDark ? '1' : '0');
+    const btn = document.getElementById('dark-mode-btn');
+    if (btn) btn.innerHTML = isDark
+      ? '<i class="ti ti-sun"></i> Mode clair'
+      : '<i class="ti ti-moon"></i> Mode sombre';
+  }
+
+  // Restaurer le mode sombre au chargement
+  if (localStorage.getItem('nx_dark') === '1') {
+    document.body.classList.add('dark');
+    const btn = document.getElementById('dark-mode-btn');
+    if (btn) btn.innerHTML = '<i class="ti ti-sun"></i> Mode clair';
+  }
+
+  // ── Raccourcis clavier ────────────────────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    // Ignorer si on est dans un input/textarea
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+    // Ignorer si un modal est ouvert
+    if (document.getElementById('account-modal-overlay').style.display === 'flex') return;
+    if (document.getElementById('folder-modal-overlay').style.display === 'flex') return;
+
+    const rows = getFilteredAutomations();
+    const total = rows.length;
+
+    switch(e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        if (selectedAutomationIndex === null) selectAutomation(0);
+        else if (selectedAutomationIndex < total - 1) selectAutomation(selectedAutomationIndex + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (selectedAutomationIndex > 0) selectAutomation(selectedAutomationIndex - 1);
+        break;
+      case 'e':
+      case 'E':
+        if (selectedAutomationIndex !== null && rows[selectedAutomationIndex]) {
+          trashAutomation(rows[selectedAutomationIndex].id);
+        }
+        break;
+      case 's':
+      case 'S':
+        if (selectedAutomationIndex !== null && rows[selectedAutomationIndex]) {
+          const r = rows[selectedAutomationIndex];
+          toggleStar(r.id, r.is_starred);
+        }
+        break;
+      case 'u':
+      case 'U':
+        if (selectedAutomationIndex !== null && rows[selectedAutomationIndex]) {
+          markAsUnread(rows[selectedAutomationIndex].id);
+        }
+        break;
+      case '/':
+        e.preventDefault();
+        document.getElementById('mail-search').focus();
+        break;
+      case 'Escape':
+        document.getElementById('mail-search').blur();
+        document.getElementById('mail-search').value = '';
+        filterAutomations();
+        break;
+    }
+  });
+
   window.toggleFoldersSection = toggleFoldersSection;
   window.restoreAutomation = restoreAutomation;
   window.trashAutomation = trashAutomation;
