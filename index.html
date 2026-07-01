@@ -202,7 +202,7 @@
     .move-to-folder-menu { display: none; position: absolute; top: 36px; left: 0; background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 8px; min-width: 160px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 20; }
     .move-to-folder-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: none; background: transparent; color: #1a1a2e; font-size: 12px; cursor: pointer; border-radius: 6px; text-align: left; }
     .move-to-folder-menu button:hover { background: #f8f9ff; color: #534AB7; }
-    .mail-detail { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; max-height: 600px; }
+    .mail-detail { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; min-height: 300px; }
     .mail-detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 13px; text-align: center; padding: 2rem; }
     .mail-detail-subject { font-size: 21px; font-weight: 500; color: #1a1a2e; margin-bottom: 6px; }
     .mail-detail-meta { font-size: 12px; color: #9ca3af; margin-bottom: 1.75rem; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -634,6 +634,23 @@
       <div style="display:flex; gap:10px;">
         <button class="btn-outline" style="flex:1;" onclick="closeConfirmDisconnect()">Annuler</button>
         <button class="btn-primary" style="flex:1; background:#e53e3e;" onclick="confirmDisconnectGmail()">Déconnecter</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- Modal vider la corbeille -->
+  <div id="confirm-empty-trash-overlay" class="account-modal-overlay" style="display:none;" onclick="if(event.target===this) closeEmptyTrashModal()">
+    <div class="account-modal" style="max-width:380px; text-align:center;">
+      <div style="width:52px; height:52px; background:#fff5f5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:22px; color:#e53e3e;">
+        <i class="ti ti-trash-x"></i>
+      </div>
+      <h3 style="margin-bottom:0.5rem; font-size:17px;">Vider la corbeille ?</h3>
+      <p style="font-size:13px; color:#6b7280; line-height:1.6; margin-bottom:1.5rem;">Tous les emails de la corbeille seront supprimés définitivement. Cette action est irréversible.</p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-outline" style="flex:1;" onclick="closeEmptyTrashModal()">Annuler</button>
+        <button class="btn-primary" style="flex:1; background:#e53e3e;" onclick="confirmEmptyTrash()">Vider</button>
       </div>
     </div>
   </div>
@@ -1071,7 +1088,15 @@
   }
 
   function emptyTrash() {
-    if (!confirm('Supprimer définitivement tous les emails de la corbeille ? Cette action est irréversible.')) return;
+    document.getElementById('confirm-empty-trash-overlay').style.display = 'flex';
+  }
+
+  function closeEmptyTrashModal() {
+    document.getElementById('confirm-empty-trash-overlay').style.display = 'none';
+  }
+
+  function confirmEmptyTrash() {
+    closeEmptyTrashModal();
     supabaseClient.auth.getUser().then(({ data }) => {
       const user = data?.user;
       if (!user) return;
@@ -1079,7 +1104,10 @@
         .delete()
         .eq('user_id', user.id)
         .not('deleted_at', 'is', null)
-        .then(() => loadEmailAutomations());
+        .then(() => {
+          renderMailDetail(null);
+          loadEmailAutomations();
+        });
     });
   }
 
@@ -1590,7 +1618,7 @@
   }
 
   function deleteFolder(id) {
-    if (!confirm('Supprimer ce dossier ? Les emails qu\'il contient seront déplacés dans la boîte de réception.')) return;
+    // Suppression directe sans confirm() (bloqué sur certains navigateurs)
     supabaseClient.from('email_automations').update({ folder_id: null }).eq('folder_id', id)
       .then(() => supabaseClient.from('folders').delete().eq('id', id))
       .then(() => {
@@ -1722,7 +1750,16 @@
         alert('Erreur réseau lors de la connexion Gmail. Vérifie la console.');
       });
     });
-  }
+  // Exposer les fonctions appelées depuis le HTML dynamique (innerHTML)
+  window.restoreAutomation = restoreAutomation;
+  window.trashAutomation = trashAutomation;
+  window.toggleStar = toggleStar;
+  window.markAsUnread = markAsUnread;
+  window.moveToFolder = moveToFolder;
+  window.toggleMoveToFolderMenu = toggleMoveToFolderMenu;
+  window.emptyTrash = emptyTrash;
+  window.toggleSelect = toggleSelect;
+}
 </script>
 
 </body>
