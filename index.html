@@ -1094,10 +1094,19 @@
         .is('deleted_at', null)
         .gt('created_at', lastSeen)
         .then(({ count }) => {
-          setNewBadge(count || 0);
+          const newCount = count || 0;
+          const previousCount = parseInt(document.getElementById('new-badge')?.textContent || '0') || 0;
+          setNewBadge(newCount);
+          // Envoyer une push notification seulement si le nombre a augmenté
+          // (nouveaux emails arrivés depuis la dernière vérification)
+          if (newCount > previousCount && !document.hasFocus()) {
+            sendPushNotification(newCount - previousCount);
+          }
         });
     });
   }
+
+  const ORIGINAL_TITLE = document.title;
 
   function setNewBadge(count) {
     const avatarBadge = document.getElementById('new-badge');
@@ -1111,6 +1120,45 @@
         el.style.display = 'none';
       }
     });
+
+    // Badge sur l'onglet du navigateur
+    if (count > 0) {
+      document.title = `(${count > 99 ? '99+' : count}) ${ORIGINAL_TITLE}`;
+    } else {
+      document.title = ORIGINAL_TITLE;
+    }
+  }
+
+  // ── Push Notifications ────────────────────────────────────────────────
+  function requestPushPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') return;
+    if (Notification.permission === 'denied') return;
+    Notification.requestPermission();
+  }
+
+  function sendPushNotification(count) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    if (count === 0) return;
+
+    const notif = new Notification('Neluxora AI', {
+      body: count === 1
+        ? '1 nouvel email a été résumé et est prêt à être consulté.'
+        : `${count} nouveaux emails ont été résumés et sont prêts à être consultés.`,
+      icon: 'logoNeluxoraAI.png',
+      badge: 'logoNeluxoraAI.png',
+      tag: 'neluxora-new-emails',
+    });
+
+    notif.onclick = () => {
+      window.focus();
+      notif.close();
+      goToDashboard();
+    };
+
+    // Fermer automatiquement après 6 secondes
+    setTimeout(() => notif.close(), 6000);
   }
 
   function markAutomationsAsSeen() {
@@ -1827,6 +1875,10 @@
     const user = JSON.parse(savedUser);
     showFloatingAvatar(user.picture);
     checkNewAutomationsBadge();
+    // Demander la permission push après 3 secondes (moins intrusif qu'immédiatement)
+    setTimeout(requestPushPermission, 3000);
+    // Vérifier les nouveaux emails toutes les 5 minutes en arrière-plan
+    setInterval(checkNewAutomationsBadge, 5 * 60 * 1000);
   }
 
   // Restaurer la vue mémorisée (site ou dashboard) au chargement, par exemple après un F5
