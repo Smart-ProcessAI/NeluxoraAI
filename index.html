@@ -164,6 +164,44 @@
     .mail-page-btn.active { background: #534AB7; border-color: #534AB7; color: #fff; font-weight: 500; }
     .mail-page-btn:disabled { opacity: 0.35; cursor: default; }
     .mail-page-ellipsis { color: #9ca3af; font-size: 12px; padding: 0 2px; }
+
+    /* Favoris, lu/non lu */
+    .mli-star { background: transparent; border: none; color: #d1d5db; font-size: 15px; cursor: pointer; padding: 2px 4px; flex-shrink: 0; transition: color 0.15s; }
+    .mli-star.starred { color: #f59e0b; }
+    .mli-star:hover { color: #f59e0b; }
+    .mli-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #534AB7; flex-shrink: 0; margin-top: 4px; }
+    .mail-list-item.unread .mli-subject { font-weight: 700; color: #1a1a2e; }
+    .mail-list-item.unread .mli-sender { font-weight: 700; color: #1a1a2e; }
+
+    /* Dossiers dans la sidebar */
+    .mail-folders { border-top: 0.5px solid rgba(0,0,0,0.08); padding: 10px 0; }
+    .mail-folders-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+    .mail-folders-add { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 15px; padding: 2px 4px; border-radius: 4px; }
+    .mail-folders-add:hover { color: #534AB7; background: #EEEDFE; }
+    .mail-folder-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; cursor: pointer; font-size: 13px; color: #6b7280; border-radius: 0; transition: background 0.15s; }
+    .mail-folder-item:hover { background: #f8f9ff; color: #534AB7; }
+    .mail-folder-item.active { background: #EEEDFE; color: #534AB7; font-weight: 500; }
+    .mail-folder-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .mail-folder-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mail-folder-delete { background: transparent; border: none; color: #d1d5db; font-size: 13px; cursor: pointer; padding: 2px 4px; opacity: 0; transition: opacity 0.15s; }
+    .mail-folder-item:hover .mail-folder-delete { opacity: 1; }
+    .mail-folder-delete:hover { color: #e53e3e; }
+
+    /* Modal création dossier */
+    .folder-modal { background: #fff; border-radius: 14px; max-width: 340px; width: 100%; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+    .folder-modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; color: #1a1a2e; }
+    .folder-modal input { width: 100%; padding: 9px 12px; border: 0.5px solid rgba(0,0,0,0.15); border-radius: 8px; font-size: 13px; outline: none; margin-bottom: 12px; }
+    .folder-modal input:focus { border-color: #534AB7; }
+    .folder-color-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .folder-color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+    .folder-color-btn.selected { border-color: #1a1a2e; }
+    .folder-modal-actions { display: flex; gap: 8px; }
+
+    /* Bouton déplacer vers dossier dans le détail */
+    .move-to-folder-wrap { position: relative; display: inline-block; }
+    .move-to-folder-menu { display: none; position: absolute; top: 36px; left: 0; background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 10px; padding: 8px; min-width: 160px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 20; }
+    .move-to-folder-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: none; background: transparent; color: #1a1a2e; font-size: 12px; cursor: pointer; border-radius: 6px; text-align: left; }
+    .move-to-folder-menu button:hover { background: #f8f9ff; color: #534AB7; }
     .mail-detail { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; max-height: 600px; }
     .mail-detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 13px; text-align: center; padding: 2rem; }
     .mail-detail-subject { font-size: 21px; font-weight: 500; color: #1a1a2e; margin-bottom: 6px; }
@@ -511,6 +549,7 @@
     <div class="mail-sidebar">
       <div class="mail-tabs">
         <button class="mail-tab active" id="tab-inbox" onclick="switchMailTab('inbox')"><i class="ti ti-inbox"></i> Boîte de réception</button>
+        <button class="mail-tab" id="tab-starred" onclick="switchMailTab('starred')"><i class="ti ti-star"></i> Favoris</button>
         <button class="mail-tab" id="tab-trash" onclick="switchMailTab('trash')"><i class="ti ti-trash"></i> Corbeille</button>
         <button class="mail-refresh-btn" id="mail-refresh-btn" title="Actualiser" onclick="refreshAutomations()"><i class="ti ti-refresh"></i></button>
       </div>
@@ -539,6 +578,13 @@
         <div class="mail-empty">Chargement...</div>
       </div>
       <div class="mail-pagination" id="mail-pagination"></div>
+      <div class="mail-folders" id="mail-folders-section">
+        <div class="mail-folders-header">
+          Dossiers
+          <button class="mail-folders-add" title="Créer un dossier" onclick="openFolderModal()"><i class="ti ti-plus"></i></button>
+        </div>
+        <div id="mail-folders-list"></div>
+      </div>
     </div>
     <div class="mail-detail" id="mail-detail">
       <div class="mail-detail-empty">Sélectionnez un email dans la liste pour voir le résumé et la réponse suggérée.</div>
@@ -585,6 +631,19 @@
       <div style="display:flex; gap:10px;">
         <button class="btn-outline" style="flex:1;" onclick="closeConfirmDisconnect()">Annuler</button>
         <button class="btn-primary" style="flex:1; background:#e53e3e;" onclick="confirmDisconnectGmail()">Déconnecter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal création/édition dossier -->
+  <div id="folder-modal-overlay" class="account-modal-overlay" style="display:none;" onclick="if(event.target===this) closeFolderModal()">
+    <div class="folder-modal">
+      <h3 id="folder-modal-title">Nouveau dossier</h3>
+      <input type="text" id="folder-name-input" placeholder="Nom du dossier..." maxlength="30">
+      <div class="folder-color-row" id="folder-color-row"></div>
+      <div class="folder-modal-actions">
+        <button class="btn-outline" style="flex:1;" onclick="closeFolderModal()">Annuler</button>
+        <button class="btn-primary" style="flex:1;" onclick="saveFolder()">Créer</button>
       </div>
     </div>
   </div>
@@ -749,6 +808,7 @@
       document.getElementById('user-avatar').src = savedUser.picture;
       checkGmailStatus();
       loadEmailAutomations();
+      loadFolders();
       return;
     }
 
@@ -767,6 +827,7 @@
       document.getElementById('user-avatar').src = userData.picture;
       checkGmailStatus();
       loadEmailAutomations();
+      loadFolders();
     });
   }
   function connectGmail() {
@@ -867,11 +928,33 @@
 
   let currentMailTab = 'inbox';
   let selectedIds = new Set();
+  let currentFolderId = null;
+  let allFolders = [];
+  let selectedFolderColor = '#534AB7';
+  const FOLDER_COLORS = ['#534AB7', '#e53e3e', '#e6a23c', '#22c55e', '#06b6d4', '#8b5cf6', '#ec4899', '#6b7280'];
 
   function switchMailTab(tab) {
     currentMailTab = tab;
+    currentFolderId = null;
     document.getElementById('tab-inbox').classList.toggle('active', tab === 'inbox');
+    document.getElementById('tab-starred').classList.toggle('active', tab === 'starred');
     document.getElementById('tab-trash').classList.toggle('active', tab === 'trash');
+    document.querySelectorAll('.mail-folder-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('mail-search').value = '';
+    selectedAutomationIndex = null;
+    clearSelection();
+    loadEmailAutomations();
+  }
+
+  function switchToFolder(folderId) {
+    currentMailTab = 'folder';
+    currentFolderId = folderId;
+    document.getElementById('tab-inbox').classList.remove('active');
+    document.getElementById('tab-starred').classList.remove('active');
+    document.getElementById('tab-trash').classList.remove('active');
+    document.querySelectorAll('.mail-folder-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.folderId === folderId);
+    });
     document.getElementById('mail-search').value = '';
     selectedAutomationIndex = null;
     clearSelection();
@@ -946,12 +1029,20 @@
 
     let query = supabaseClient
       .from('email_automations')
-      .select('id, subject, sender, summary, suggested_reply, created_at, deleted_at', { count: 'exact' })
+      .select('id, subject, sender, summary, suggested_reply, created_at, deleted_at, is_starred, is_read, folder_id', { count: 'exact' })
       .eq('user_id', currentMailUserId)
       .order('created_at', { ascending: false })
       .range(from, to);
 
-    query = currentMailTab === 'trash' ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null);
+    if (currentMailTab === 'trash') {
+      query = query.not('deleted_at', 'is', null);
+    } else if (currentMailTab === 'starred') {
+      query = query.is('deleted_at', null).eq('is_starred', true);
+    } else if (currentMailTab === 'folder' && currentFolderId) {
+      query = query.is('deleted_at', null).eq('folder_id', currentFolderId);
+    } else {
+      query = query.is('deleted_at', null);
+    }
 
     query.then(({ data: rows, count, error }) => {
       if (error || !rows) {
@@ -1188,23 +1279,24 @@
     countEl.textContent = totalAutomationsCount + ' email' + (totalAutomationsCount > 1 ? 's' : '') + ' au total';
 
     if (rows.length === 0) {
-      listEl.innerHTML = `<div class="mail-empty">${currentMailTab === 'trash' ? 'La corbeille est vide.' : 'Aucun email ne correspond.'}</div>`;
+      listEl.innerHTML = `<div class="mail-empty">${currentMailTab === 'trash' ? 'La corbeille est vide.' : currentMailTab === 'starred' ? 'Aucun favori pour le moment.' : currentMailTab === 'folder' ? 'Ce dossier est vide.' : 'Aucun email ne correspond.'}</div>`;
       renderPaginationControls();
       return;
     }
 
     listEl.innerHTML = rows.map((r, i) => `
-      <div class="mail-list-item${selectedAutomationIndex === i ? ' active' : ''}${selectedIds.has(r.id) ? ' checked' : ''}" onclick="selectAutomation(${i})">
+      <div class="mail-list-item${selectedAutomationIndex === i ? ' active' : ''}${selectedIds.has(r.id) ? ' checked' : ''}${!r.is_read ? ' unread' : ''}" onclick="selectAutomation(${i})">
         <div class="mli-row">
           <span class="mli-checkbox-wrap">
             <input type="checkbox" ${selectedIds.has(r.id) ? 'checked' : ''} onclick="toggleSelect('${r.id}', event)">
           </span>
+          <button class="mli-star${r.is_starred ? ' starred' : ''}" title="${r.is_starred ? 'Retirer des favoris' : 'Ajouter aux favoris'}" onclick="event.stopPropagation(); toggleStar('${r.id}', ${r.is_starred})"><i class="ti ti-star${r.is_starred ? '-filled' : ''}"></i></button>
           <div class="mli-row-content">
             <div class="mli-top">
               <span class="mli-sender">${escapeHtml(r.sender)}</span>
               <span class="mli-date">${new Date(r.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</span>
             </div>
-            <div class="mli-subject">${escapeHtml(r.subject) || '(sans sujet)'}</div>
+            <div class="mli-subject">${!r.is_read ? '<span class="mli-unread-dot" style="display:inline-block; vertical-align:middle; margin-right:5px;"></span>' : ''}${escapeHtml(r.subject) || '(sans sujet)'}</div>
             <div class="mli-snippet">${escapeHtml(truncate(r.summary, 70))}</div>
             <div class="mli-bottom">
               ${currentMailTab === 'trash'
@@ -1289,6 +1381,26 @@
       return;
     }
 
+    // Marquer automatiquement comme lu
+    if (!row.is_read) {
+      markAsRead(row.id);
+      row.is_read = true;
+      const items = document.querySelectorAll('.mail-list-item');
+      if (selectedAutomationIndex !== null && items[selectedAutomationIndex]) {
+        items[selectedAutomationIndex].classList.remove('unread');
+      }
+    }
+
+    const folderBtnLabel = allFolders.length > 0
+      ? `<div class="move-to-folder-wrap">
+           <button class="btn-outline" style="font-size:12px; padding:5px 12px;" onclick="toggleMoveToFolderMenu(this, '${row.id}')"><i class="ti ti-folder"></i> Déplacer</button>
+           <div class="move-to-folder-menu">
+             <button onclick="moveToFolder('${row.id}', null); this.closest('.move-to-folder-menu').style.display='none'"><i class="ti ti-inbox"></i> Boîte de réception</button>
+             ${allFolders.map(f => `<button onclick="moveToFolder('${row.id}', '${f.id}'); this.closest('.move-to-folder-menu').style.display='none'"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${f.color};margin-right:4px;"></span>${escapeHtml(f.name)}</button>`).join('')}
+           </div>
+         </div>`
+      : '';
+
     detailEl.innerHTML = `
       <div class="mail-detail-subject">${escapeHtml(row.subject) || '(sans sujet)'}</div>
       <div class="mail-detail-meta">
@@ -1310,10 +1422,19 @@
         </div>
         <div class="mail-block-content">${escapeHtml(row.suggested_reply) || 'Aucune réponse suggérée.'}</div>
       </div>
-      ${currentMailTab === 'trash'
-        ? `<button class="btn-outline" onclick="restoreAutomation('${row.id}')"><i class="ti ti-arrow-back-up"></i> Restaurer cet email</button>`
-        : `<button class="btn-outline" style="color:#e53e3e; border-color:#e53e3e;" onclick="trashAutomation('${row.id}')"><i class="ti ti-trash"></i> Mettre à la corbeille</button>`
-      }
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;">
+        <button class="btn-outline" style="font-size:12px; padding:5px 12px; color:${row.is_starred ? '#f59e0b' : ''}; border-color:${row.is_starred ? '#f59e0b' : ''};" onclick="toggleStar('${row.id}', ${row.is_starred}); this.closest('.mail-detail').innerHTML = ''; loadEmailAutomations();">
+          <i class="ti ti-star${row.is_starred ? '-filled' : ''}"></i> ${row.is_starred ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+        </button>
+        <button class="btn-outline" style="font-size:12px; padding:5px 12px;" onclick="markAsUnread('${row.id}')">
+          <i class="ti ti-mail"></i> Marquer non lu
+        </button>
+        ${folderBtnLabel}
+        ${currentMailTab === 'trash'
+          ? `<button class="btn-outline" onclick="restoreAutomation('${row.id}')"><i class="ti ti-arrow-back-up"></i> Restaurer</button>`
+          : `<button class="btn-outline" style="color:#e53e3e; border-color:#e53e3e;" onclick="trashAutomation('${row.id}')"><i class="ti ti-trash"></i> Corbeille</button>`
+        }
+      </div>
     `;
   }
 
@@ -1360,6 +1481,123 @@
     renderMailList(filtered);
     renderMailDetail(null);
   }
+
+  // ── Favoris ──────────────────────────────────────────────────────────
+  function toggleStar(id, currentValue) {
+    supabaseClient.from('email_automations')
+      .update({ is_starred: !currentValue })
+      .eq('id', id)
+      .then(() => loadEmailAutomations());
+  }
+
+  // ── Lu / Non lu ───────────────────────────────────────────────────────
+  function markAsRead(id) {
+    supabaseClient.from('email_automations').update({ is_read: true }).eq('id', id).then(() => {});
+  }
+
+  function markAsUnread(id) {
+    supabaseClient.from('email_automations')
+      .update({ is_read: false })
+      .eq('id', id)
+      .then(() => {
+        checkNewAutomationsBadge();
+        loadEmailAutomations();
+      });
+  }
+
+  // ── Dossiers ──────────────────────────────────────────────────────────
+  function loadFolders() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      supabaseClient.from('folders').select('id, name, color').eq('user_id', user.id).order('created_at')
+        .then(({ data: rows }) => {
+          allFolders = rows || [];
+          renderFoldersList();
+        });
+    });
+  }
+
+  function renderFoldersList() {
+    const listEl = document.getElementById('mail-folders-list');
+    if (allFolders.length === 0) {
+      listEl.innerHTML = '<div style="padding:6px 16px; font-size:12px; color:#9ca3af;">Aucun dossier</div>';
+      return;
+    }
+    listEl.innerHTML = allFolders.map(f => `
+      <div class="mail-folder-item" data-folder-id="${f.id}" onclick="switchToFolder('${f.id}')">
+        <span class="mail-folder-dot" style="background:${f.color};"></span>
+        <span class="mail-folder-name">${escapeHtml(f.name)}</span>
+        <button class="mail-folder-delete" title="Supprimer" onclick="event.stopPropagation(); deleteFolder('${f.id}')"><i class="ti ti-x"></i></button>
+      </div>
+    `).join('');
+  }
+
+  function openFolderModal() {
+    document.getElementById('folder-modal-title').textContent = 'Nouveau dossier';
+    document.getElementById('folder-name-input').value = '';
+    selectedFolderColor = '#534AB7';
+    const colorRow = document.getElementById('folder-color-row');
+    colorRow.innerHTML = FOLDER_COLORS.map(c => `
+      <button class="folder-color-btn${c === selectedFolderColor ? ' selected' : ''}" style="background:${c};" onclick="selectFolderColor('${c}', this)"></button>
+    `).join('');
+    document.getElementById('folder-modal-overlay').style.display = 'flex';
+    document.getElementById('folder-name-input').focus();
+  }
+
+  function closeFolderModal() {
+    document.getElementById('folder-modal-overlay').style.display = 'none';
+  }
+
+  function selectFolderColor(color, btn) {
+    selectedFolderColor = color;
+    document.querySelectorAll('.folder-color-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function saveFolder() {
+    const name = document.getElementById('folder-name-input').value.trim();
+    if (!name) return;
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      supabaseClient.from('folders').insert({ user_id: user.id, name, color: selectedFolderColor })
+        .then(() => {
+          closeFolderModal();
+          loadFolders();
+        });
+    });
+  }
+
+  function deleteFolder(id) {
+    if (!confirm('Supprimer ce dossier ? Les emails qu\'il contient seront déplacés dans la boîte de réception.')) return;
+    supabaseClient.from('email_automations').update({ folder_id: null }).eq('folder_id', id)
+      .then(() => supabaseClient.from('folders').delete().eq('id', id))
+      .then(() => {
+        if (currentFolderId === id) switchMailTab('inbox');
+        else loadFolders();
+      });
+  }
+
+  function moveToFolder(emailId, folderId) {
+    supabaseClient.from('email_automations')
+      .update({ folder_id: folderId })
+      .eq('id', emailId)
+      .then(() => loadEmailAutomations());
+  }
+
+  function toggleMoveToFolderMenu(btn, emailId) {
+    const menu = btn.nextElementSibling;
+    const isOpen = menu.style.display === 'block';
+    document.querySelectorAll('.move-to-folder-menu').forEach(m => m.style.display = 'none');
+    if (!isOpen) menu.style.display = 'block';
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.move-to-folder-wrap')) {
+      document.querySelectorAll('.move-to-folder-menu').forEach(m => m.style.display = 'none');
+    }
+  });
 
   function goHome() {
     document.getElementById('main-site').style.display = 'block';
