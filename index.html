@@ -114,23 +114,31 @@
 
     /* Mail app dashboard */
     .mail-app { display: flex; width: 100%; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
-    .mail-sidebar { width: 32%; min-width: 320px; max-width: 460px; border-right: 0.5px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; }
-    .mail-tabs { display: flex; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
-    .mail-tab { flex: 1; background: transparent; border: none; padding: 12px 8px; font-size: 12px; font-weight: 500; color: #9ca3af; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border-bottom: 2px solid transparent; }
-    .mail-tab:hover { color: #534AB7; }
-    .mail-tab.active { color: #534AB7; border-bottom-color: #534AB7; }
-    .mail-refresh-btn { background: transparent; border: none; color: #9ca3af; cursor: pointer; padding: 0 12px; display: flex; align-items: center; font-size: 16px; flex-shrink: 0; }
-    .mail-refresh-btn:hover { color: #534AB7; }
+
+    /* Colonne 1 : Nav gauche */
+    .mail-nav { width: 200px; min-width: 160px; flex-shrink: 0; border-right: 0.5px solid rgba(0,0,0,0.08); padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; background: #fafafa; }
+    .mail-nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border: none; background: transparent; color: #6b7280; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 8px; text-align: left; transition: background 0.15s, color 0.15s; }
+    .mail-nav-btn:hover { background: #EEEDFE; color: #534AB7; }
+    .mail-nav-btn.active { background: #EEEDFE; color: #534AB7; }
+    .mail-nav-btn i { font-size: 16px; flex-shrink: 0; }
+    .mail-nav-separator { height: 0.5px; background: rgba(0,0,0,0.08); margin: 8px 4px; }
+    .mail-nav-folders-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; border-radius: 6px; }
+    .mail-nav-folders-header:hover { background: #f0f0f5; }
+    .mail-nav-folders-list { display: flex; flex-direction: column; gap: 1px; overflow: hidden; transition: max-height 0.25s ease; max-height: 400px; }
+    .mail-nav-folders-list.collapsed { max-height: 0; }
+
+    /* Colonne 2 : Liste emails */
+    .mail-sidebar { width: 340px; min-width: 260px; flex-shrink: 0; border-right: 0.5px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+    .mail-sidebar-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
+    .mail-refresh-btn { background: transparent; border: none; color: #9ca3af; cursor: pointer; padding: 6px 8px; display: flex; align-items: center; font-size: 16px; flex-shrink: 0; border-radius: 6px; }
+    .mail-refresh-btn:hover { color: #534AB7; background: #EEEDFE; }
     .mail-refresh-btn.spinning i { animation: nx-spin 0.7s linear infinite; }
     @keyframes nx-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .mail-search-wrap { padding: 14px; border-bottom: 0.5px solid rgba(0,0,0,0.08); position: relative; }
-    .mail-date-filter-wrap { padding: 0 14px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
-    #mail-date-filter { width: 100%; padding: 7px 10px; background: #f8f9ff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 12px; color: #6b7280; outline: none; cursor: pointer; }
-    #mail-date-filter:focus { border-color: #534AB7; }
-    .mail-search-wrap i { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 15px; pointer-events: none; }
-    #mail-search { width: 100%; padding: 10px 12px 10px 36px; background: #f8f9ff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 13px; outline: none; }
+    .mail-search-wrap { flex: 1; position: relative; }
+    .mail-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+    #mail-search { width: 100%; padding: 8px 10px 8px 30px; background: #f8f9ff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 13px; outline: none; }
     #mail-search:focus { border-color: #534AB7; }
-    .mail-count { font-size: 11px; color: #9ca3af; padding: 8px 18px 4px; }
+    .mail-count { font-size: 11px; color: #9ca3af; padding: 8px 16px 4px; }
     .mail-list { overflow-y: auto; flex: 1; max-height: 540px; }
     .mail-list-item { padding: 14px 18px; border-bottom: 0.5px solid rgba(0,0,0,0.06); cursor: pointer; transition: background 0.15s; }
     .mail-list-item:hover { background: #f8f9ff; }
@@ -178,9 +186,9 @@
     .mail-folders-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
     .mail-folders-add { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 15px; padding: 2px 4px; border-radius: 4px; }
     .mail-folders-add:hover { color: #534AB7; background: #EEEDFE; }
-    .mail-folder-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; cursor: pointer; font-size: 13px; color: #6b7280; border-radius: 0; transition: background 0.15s; }
-    .mail-folder-item:hover { background: #f8f9ff; color: #534AB7; }
-    .mail-folder-item.active { background: #EEEDFE; color: #534AB7; font-weight: 500; }
+    .mail-folder-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; font-size: 13px; color: #6b7280; border-radius: 8px; transition: background 0.15s; font-weight: 500; }
+    .mail-folder-item:hover { background: #EEEDFE; color: #534AB7; }
+    .mail-folder-item.active { background: #EEEDFE; color: #534AB7; }
     .mail-folder-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .mail-folder-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mail-folder-delete { background: transparent; border: none; color: #d1d5db; font-size: 13px; cursor: pointer; padding: 2px 4px; opacity: 0; transition: opacity 0.15s; }
@@ -546,19 +554,42 @@
   <h2 style="margin-bottom:1rem">Vos automatisations</h2>
 
   <div class="mail-app">
+
+    <!-- Colonne 1 : Navigation gauche -->
+    <div class="mail-nav">
+      <button class="mail-nav-btn" id="tab-inbox" onclick="switchMailTab('inbox')">
+        <i class="ti ti-inbox"></i> Boîte de réception
+      </button>
+      <button class="mail-nav-btn" id="tab-starred" onclick="switchMailTab('starred')">
+        <i class="ti ti-star"></i> Favoris
+      </button>
+      <button class="mail-nav-btn" id="tab-trash" onclick="switchMailTab('trash')">
+        <i class="ti ti-trash"></i> Corbeille
+      </button>
+
+      <div class="mail-nav-separator"></div>
+
+      <div class="mail-nav-folders-header" onclick="toggleFoldersSection()">
+        <span><i class="ti ti-folder"></i> Dossiers</span>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <button class="mail-folders-add" title="Créer un dossier" onclick="event.stopPropagation(); openFolderModal()"><i class="ti ti-plus"></i></button>
+          <i class="ti ti-chevron-down" id="folders-chevron" style="font-size:12px; color:#9ca3af; transition:transform 0.2s;"></i>
+        </div>
+      </div>
+      <div id="mail-folders-list" class="mail-nav-folders-list"></div>
+    </div>
+
+    <!-- Colonne 2 : Liste des emails -->
     <div class="mail-sidebar">
-      <div class="mail-tabs">
-        <button class="mail-tab active" id="tab-inbox" onclick="switchMailTab('inbox')"><i class="ti ti-inbox"></i> Boîte de réception</button>
-        <button class="mail-tab" id="tab-starred" onclick="switchMailTab('starred')"><i class="ti ti-star"></i> Favoris</button>
-        <button class="mail-tab" id="tab-trash" onclick="switchMailTab('trash')"><i class="ti ti-trash"></i> Corbeille</button>
+      <div class="mail-sidebar-toolbar">
+        <div class="mail-search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" id="mail-search" placeholder="Rechercher..." oninput="filterAutomations()">
+        </div>
         <button class="mail-refresh-btn" id="mail-refresh-btn" title="Actualiser" onclick="refreshAutomations()"><i class="ti ti-refresh"></i></button>
       </div>
-      <div class="mail-search-wrap">
-        <i class="ti ti-search"></i>
-        <input type="text" id="mail-search" placeholder="Rechercher un email, un expéditeur..." oninput="filterAutomations()">
-      </div>
-      <div class="mail-date-filter-wrap">
-        <select id="mail-date-filter" onchange="filterAutomations()">
+      <div class="mail-sidebar-toolbar" style="padding-top:0;">
+        <select id="mail-date-filter" onchange="filterAutomations()" style="flex:1; padding:7px 10px; background:#f8f9ff; border:0.5px solid rgba(0,0,0,0.1); border-radius:8px; font-size:12px; color:#6b7280; outline:none; cursor:pointer;">
           <option value="all">Toutes les dates</option>
           <option value="today">Aujourd'hui</option>
           <option value="week">Cette semaine</option>
@@ -581,14 +612,9 @@
         <div class="mail-empty">Chargement...</div>
       </div>
       <div class="mail-pagination" id="mail-pagination"></div>
-      <div class="mail-folders" id="mail-folders-section">
-        <div class="mail-folders-header">
-          Dossiers
-          <button class="mail-folders-add" title="Créer un dossier" onclick="openFolderModal()"><i class="ti ti-plus"></i></button>
-        </div>
-        <div id="mail-folders-list"></div>
-      </div>
     </div>
+
+    <!-- Colonne 3 : Détail -->
     <div class="mail-detail" id="mail-detail">
       <div class="mail-detail-empty">Sélectionnez un email dans la liste pour voir le résumé et la réponse suggérée.</div>
     </div>
@@ -964,6 +990,13 @@
     selectedAutomationIndex = null;
     clearSelection();
     loadEmailAutomations();
+  }
+
+  function toggleFoldersSection() {
+    const list = document.getElementById('mail-folders-list');
+    const chevron = document.getElementById('folders-chevron');
+    list.classList.toggle('collapsed');
+    chevron.style.transform = list.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';
   }
 
   function switchToFolder(folderId) {
@@ -1753,6 +1786,7 @@
   }
 
   // Exposer les fonctions appelées depuis le HTML dynamique (innerHTML)
+  window.toggleFoldersSection = toggleFoldersSection;
   window.restoreAutomation = restoreAutomation;
   window.trashAutomation = trashAutomation;
   window.toggleStar = toggleStar;
