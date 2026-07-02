@@ -246,6 +246,11 @@
     .account-modal-label { color: #9ca3af; }
     .account-modal-row span:last-child { color: #1a1a2e; font-weight: 500; text-align: right; }
     .account-modal-note { font-size: 12px; color: #9ca3af; margin-top: 1rem; line-height: 1.5; }
+    .toggle-wrap { cursor: pointer; }
+    .toggle-track { width: 40px; height: 22px; background: #d1d5db; border-radius: 999px; position: relative; transition: background 0.2s; }
+    .toggle-track.on { background: #534AB7; }
+    .toggle-thumb { width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle-track.on .toggle-thumb { left: 20px; }
 
     /* ── Mode sombre ────────────────────────────────────────────────── */
     body.dark nav, body.dark .card, body.dark .pricing-card, body.dark .login-card,
@@ -294,6 +299,7 @@
     body.dark .move-to-folder-menu button { color: #e5e7eb; }
     body.dark .move-to-folder-menu button:hover { background: #374151; }
     body.dark .otp-inputs input { background: #374151; border-color: rgba(255,255,255,0.12); color: #f9fafb; }
+    body.dark #send-reply-body { background: #374151; border-color: rgba(255,255,255,0.12); color: #f9fafb; }
 
     @media (max-width: 760px) {
       #dashboard { padding: 2rem 1rem 3rem; }
@@ -709,6 +715,17 @@
         <span class="account-modal-label">Date de renouvellement</span>
         <span id="account-modal-renewal">—</span>
       </div>
+      <div class="account-modal-row">
+        <span class="account-modal-label">Envoi automatique des réponses</span>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <span id="auto-send-label" style="font-size:12px; color:#9ca3af;">Désactivé</span>
+          <div class="toggle-wrap" onclick="toggleAutoSend()">
+            <div class="toggle-track" id="auto-send-track">
+              <div class="toggle-thumb" id="auto-send-thumb"></div>
+            </div>
+          </div>
+        </label>
+      </div>
       <p class="account-modal-note">Votre quota d'emails se réinitialise automatiquement à la date de renouvellement indiquée ci-dessus.</p>
     </div>
   </div>
@@ -753,6 +770,23 @@
       <div class="folder-modal-actions">
         <button class="btn-outline" style="flex:1;" onclick="closeFolderModal()">Annuler</button>
         <button class="btn-primary" style="flex:1;" onclick="saveFolder()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal envoi de réponse -->
+  <div id="send-reply-overlay" class="account-modal-overlay" style="display:none;" onclick="if(event.target===this) closeSendReplyModal()">
+    <div class="account-modal" style="max-width:560px; text-align:left;">
+      <div class="account-modal-header">
+        <h3><i class="ti ti-send" style="margin-right:6px;"></i> Envoyer la réponse</h3>
+        <button class="account-modal-close" onclick="closeSendReplyModal()"><i class="ti ti-x"></i></button>
+      </div>
+      <p id="send-reply-to" style="font-size:12px; color:#9ca3af; margin-bottom:12px;"></p>
+      <textarea id="send-reply-body" style="width:100%; height:200px; padding:12px; background:#f8f9ff; border:0.5px solid rgba(0,0,0,0.15); border-radius:8px; font-size:13px; line-height:1.6; outline:none; resize:vertical; font-family:inherit;" placeholder="Réponse..."></textarea>
+      <p style="font-size:11px; color:#9ca3af; margin-top:6px; margin-bottom:1rem;">Vous pouvez modifier la réponse avant de l'envoyer.</p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-outline" style="flex:1;" onclick="closeSendReplyModal()">Annuler</button>
+        <button class="btn-primary" style="flex:1;" id="send-reply-btn" onclick="confirmSendReply()"><i class="ti ti-send"></i> Envoyer</button>
       </div>
     </div>
   </div>
@@ -1308,12 +1342,13 @@
 
       Promise.all([
         supabaseClient.from('gmail_connections').select('email').eq('user_id', user.id).maybeSingle(),
-        supabaseClient.from('subscriptions').select('plan, plan_started_at').eq('user_id', user.id).maybeSingle()
+        supabaseClient.from('subscriptions').select('plan, plan_started_at, auto_send').eq('user_id', user.id).maybeSingle()
       ]).then(([gmailResult, subResult]) => {
         const gmailRow = gmailResult.data;
         const subRow = subResult.data;
         const plan = subRow?.plan || 'starter';
         const limit = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
+        const autoSend = subRow?.auto_send || false;
 
         document.getElementById('account-modal-gmail').textContent = gmailRow?.email || 'Non connectée';
         document.getElementById('account-modal-plan').textContent = PLAN_LABELS[plan] || plan;
@@ -1326,7 +1361,41 @@
         } else {
           document.getElementById('account-modal-renewal').textContent = '—';
         }
+
+        setAutoSendUI(autoSend);
       });
+    });
+  }
+
+  function setAutoSendUI(enabled) {
+    const track = document.getElementById('auto-send-track');
+    const label = document.getElementById('auto-send-label');
+    if (!track || !label) return;
+    if (enabled) {
+      track.classList.add('on');
+      label.textContent = 'Activé';
+      label.style.color = '#534AB7';
+    } else {
+      track.classList.remove('on');
+      label.textContent = 'Désactivé';
+      label.style.color = '#9ca3af';
+    }
+  }
+
+  function toggleAutoSend() {
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user) return;
+      const track = document.getElementById('auto-send-track');
+      const currentState = track.classList.contains('on');
+      const newState = !currentState;
+      supabaseClient.from('subscriptions')
+        .update({ auto_send: newState })
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) { alert('Erreur lors de la mise à jour.'); return; }
+          setAutoSendUI(newState);
+        });
     });
   }
 
@@ -1619,6 +1688,12 @@
         <div class="mail-block-content">${escapeHtml(row.suggested_reply) || 'Aucune réponse suggérée.'}</div>
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1.25rem; padding-top:1.25rem; border-top:0.5px solid rgba(0,0,0,0.06);">
+        ${row.sent_at
+          ? `<span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#22c55e; font-weight:500; padding:8px 0;"><i class="ti ti-circle-check"></i> Réponse envoyée le ${new Date(row.sent_at).toLocaleDateString('fr-FR')}</span>`
+          : row.suggested_reply
+            ? `<button class="btn-primary" style="font-size:13px; padding:8px 16px;" onclick="openSendReplyModal('${row.id}', ${JSON.stringify(row.sender)}, ${JSON.stringify(row.suggested_reply)})"><i class="ti ti-send"></i> Modifier & Envoyer</button>`
+            : ''
+        }
         <button class="btn-outline" style="font-size:13px; padding:8px 16px; color:${row.is_starred ? '#f59e0b' : ''}; border-color:${row.is_starred ? '#f59e0b' : ''};" onclick="toggleStar('${row.id}', ${row.is_starred}); loadEmailAutomations();">
           <i class="ti ti-star${row.is_starred ? '-filled' : ''}"></i> ${row.is_starred ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         </button>
@@ -1720,6 +1795,66 @@
   // ── Lu / Non lu ───────────────────────────────────────────────────────
   function markAsRead(id) {
     supabaseClient.from('email_automations').update({ is_read: true }).eq('id', id).then(() => {});
+  }
+
+  // ── Envoi de réponse ─────────────────────────────────────────────────
+  let currentSendReplyId = null;
+
+  function openSendReplyModal(automationId, sender, suggestedReply) {
+    currentSendReplyId = automationId;
+    document.getElementById('send-reply-to').textContent = 'À : ' + sender;
+    document.getElementById('send-reply-body').value = suggestedReply || '';
+    document.getElementById('send-reply-overlay').style.display = 'flex';
+    document.getElementById('send-reply-body').focus();
+  }
+
+  function closeSendReplyModal() {
+    document.getElementById('send-reply-overlay').style.display = 'none';
+    currentSendReplyId = null;
+  }
+
+  async function confirmSendReply() {
+    const body = document.getElementById('send-reply-body').value.trim();
+    if (!body) return;
+
+    const btn = document.getElementById('send-reply-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader"></i> Envoi...';
+
+    supabaseClient.auth.getSession().then(async ({ data }) => {
+      const session = data?.session;
+      if (!session) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Envoyer'; return; }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-reply`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            user_id: session.user.id,
+            automation_id: currentSendReplyId,
+            reply_body: body
+          })
+        });
+
+        const result = await res.json();
+        if (!res.ok) {
+          alert('Erreur lors de l\'envoi : ' + (result.error || 'Erreur inconnue'));
+          btn.disabled = false;
+          btn.innerHTML = '<i class="ti ti-send"></i> Envoyer';
+          return;
+        }
+
+        closeSendReplyModal();
+        loadEmailAutomations();
+      } catch(err) {
+        alert('Erreur réseau : ' + err);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-send"></i> Envoyer';
+      }
+    });
   }
 
   function markAsUnread(id) {
@@ -2006,6 +2141,10 @@
   });
 
   window.toggleFoldersSection = toggleFoldersSection;
+  window.openSendReplyModal = openSendReplyModal;
+  window.confirmSendReply = confirmSendReply;
+  window.closeSendReplyModal = closeSendReplyModal;
+  window.toggleAutoSend = toggleAutoSend;
   window.restoreAutomation = restoreAutomation;
   window.trashAutomation = trashAutomation;
   window.toggleStar = toggleStar;
