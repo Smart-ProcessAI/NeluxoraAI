@@ -7,6 +7,7 @@
   <link rel="icon" href="logoNeluxoraAI.png" type="image/png" sizes="64x64">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -346,6 +347,7 @@
       <a onclick="toggleDashNavMore(event)">Plus <i class="ti ti-chevron-down" style="font-size:13px;"></i></a>
       <div id="dash-nav-more" class="nav-dropdown-menu">
         <button onclick="document.querySelector('#dashboard').scrollIntoView({behavior:'smooth'}); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-layout-dashboard"></i> Tableau de bord</button>
+        <button onclick="openStats(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-chart-bar"></i> Statistiques</button>
         <button onclick="openAccountModal(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-user"></i> Mon compte</button>
         <button id="menu-gmail-connect" onclick="connectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail"></i> Connecter Gmail</button>
         <button id="menu-gmail-change" style="display:none;" onclick="connectGmail(); document.getElementById('dash-nav-more').style.display='none';"><i class="ti ti-mail"></i> Changer d'adresse Gmail</button>
@@ -686,6 +688,42 @@
     <!-- Colonne 3 : Détail -->
     <div class="mail-detail" id="mail-detail">
       <div class="mail-detail-empty">Sélectionnez un email dans la liste pour voir le résumé et la réponse suggérée.</div>
+    </div>
+  </div>
+
+  <!-- Section Statistiques -->
+  <div id="stats-section" style="display:none; margin-top:2rem;">
+    <div class="section-label">Statistiques</div>
+    <h2 style="margin-bottom:1.5rem;">Vue d'ensemble</h2>
+
+    <div class="dash-cards" style="margin-bottom:2rem;">
+      <div class="dash-card">
+        <div class="label">Temps économisé (total)</div>
+        <div class="value" id="stat-time-saved">—</div>
+        <div class="sub">estimé à 3 min/email</div>
+      </div>
+      <div class="dash-card">
+        <div class="label">Taux de réponses envoyées</div>
+        <div class="value" id="stat-reply-rate">—</div>
+        <div class="sub">des emails traités</div>
+      </div>
+      <div class="dash-card">
+        <div class="label">Emails traités (total)</div>
+        <div class="value" id="stat-total">—</div>
+        <div class="sub">depuis le début</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div class="dash-card">
+        <div class="label" style="margin-bottom:1rem;">Emails traités par semaine</div>
+        <canvas id="chart-weekly" height="200"></canvas>
+      </div>
+      <div class="dash-card" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="label" style="margin-bottom:1rem; align-self:flex-start;">Répartition par priorité</div>
+        <canvas id="chart-priority" height="200" style="max-width:200px;"></canvas>
+        <div id="chart-priority-legend" style="margin-top:1rem; display:flex; gap:16px; font-size:12px; color:#6b7280;"></div>
+      </div>
     </div>
   </div>
 
@@ -2074,6 +2112,152 @@
 
   // Exposer les fonctions appelées depuis le HTML dynamique (innerHTML)
   // ── Mode sombre ────────────────────────────────────────────────────────
+  // ── Statistiques ──────────────────────────────────────────────────────
+  let weeklyChart = null;
+  let priorityChart = null;
+
+  function openStats() {
+    const statsSection = document.getElementById('stats-section');
+    const isVisible = statsSection.style.display !== 'none';
+    if (isVisible) {
+      statsSection.style.display = 'none';
+      return;
+    }
+    statsSection.style.display = 'block';
+    statsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    loadStats();
+  }
+
+  async function loadStats() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    const { data: rows } = await supabaseClient
+      .from('email_automations')
+      .select('created_at, priority, sent_at, deleted_at')
+      .eq('user_id', user.id);
+
+    if (!rows) return;
+
+    const all = rows.filter(r => !r.deleted_at);
+    const total = all.length;
+    const sent = all.filter(r => r.sent_at).length;
+    const timeSavedMin = total * 3;
+    const timeSavedH = Math.floor(timeSavedMin / 60);
+    const timeSavedM = timeSavedMin % 60;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-time-saved').textContent =
+      timeSavedH > 0 ? `${timeSavedH}h${timeSavedM > 0 ? timeSavedM + 'min' : ''}` : `${timeSavedM}min`;
+    document.getElementById('stat-reply-rate').textContent =
+      total > 0 ? Math.round((sent / total) * 100) + '%' : '—';
+
+    renderWeeklyChart(all);
+    renderPriorityChart(all);
+  }
+
+  function renderWeeklyChart(rows) {
+    const isDark = document.body.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const labelColor = isDark ? '#9ca3af' : '#6b7280';
+
+    // Générer les 8 dernières semaines
+    const weeks = [];
+    const counts = [];
+    const now = new Date();
+    for (let i = 7; i >= 0; i--) {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - (i * 7));
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+
+      const label = weekStart.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+      const count = rows.filter(r => {
+        const d = new Date(r.created_at);
+        return d >= weekStart && d < weekEnd;
+      }).length;
+      weeks.push(label);
+      counts.push(count);
+    }
+
+    if (weeklyChart) weeklyChart.destroy();
+    const ctx = document.getElementById('chart-weekly').getContext('2d');
+    weeklyChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: weeks,
+        datasets: [{
+          label: 'Emails traités',
+          data: counts,
+          backgroundColor: '#534AB7',
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => `${ctx.parsed.y} email(s)` } }
+        },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { color: labelColor, stepSize: 1, font: { size: 11 } }, beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  function renderPriorityChart(rows) {
+    const urgent = rows.filter(r => r.priority === 'urgent').length;
+    const important = rows.filter(r => r.priority === 'important').length;
+    const normal = rows.filter(r => !r.priority || r.priority === 'normal').length;
+    const total = rows.length;
+
+    if (priorityChart) priorityChart.destroy();
+    const ctx = document.getElementById('chart-priority').getContext('2d');
+    priorityChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Normal', 'Important', 'Urgent'],
+        datasets: [{
+          data: [normal, important, urgent],
+          backgroundColor: ['#534AB7', '#d97706', '#e53e3e'],
+          borderWidth: 0,
+          hoverOffset: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const val = ctx.parsed;
+                const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                return `${ctx.label} : ${val} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    document.getElementById('chart-priority-legend').innerHTML = [
+      { label: 'Normal', color: '#534AB7', count: normal },
+      { label: 'Important', color: '#d97706', count: important },
+      { label: 'Urgent', color: '#e53e3e', count: urgent },
+    ].map(item => `
+      <span style="display:flex; align-items:center; gap:5px;">
+        <span style="width:10px; height:10px; border-radius:50%; background:${item.color}; display:inline-block;"></span>
+        ${item.label} (${item.count})
+      </span>
+    `).join('');
+  }
+
   function toggleDarkMode() {
     const isDark = document.body.classList.toggle('dark');
     localStorage.setItem('nx_dark', isDark ? '1' : '0');
@@ -2143,6 +2327,7 @@
   });
 
   window.toggleFoldersSection = toggleFoldersSection;
+  window.openStats = openStats;
   window.openSendReplyModal = openSendReplyModal;
   window.confirmSendReply = confirmSendReply;
   window.closeSendReplyModal = closeSendReplyModal;
